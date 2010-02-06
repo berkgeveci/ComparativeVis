@@ -1,0 +1,56 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+   <SourceProxy name="FileCollectionReader" class="vtkFileCollectionReader" label="Read Files in Table">
+      <Documentation
+         long_help="" 
+         short_help="">
+      </Documentation>
+
+      <StringVectorProperty 
+         name="Table" 
+         command="SetTableFromString"
+         number_of_elements="1"
+         default_values="a,b,c &#xa;a,/Users/berk/foo.vtk,12&#xa;1,/Users/berk/bar.vtk,2">
+        <Hints>
+          <Widget type="multi_line"/>
+        </Hints>
+        <Documentation>
+        </Documentation>
+      </StringVectorProperty>
+
+      <StringVectorProperty 
+         name="FileNameColumn" 
+         command="SetFileNameColumn"
+         number_of_elements="1"
+         default_values="b" >
+        <Documentation>
+        </Documentation>
+      </StringVectorProperty>
+
+      <IntVectorProperty 
+         name="NumberOfRows"
+         command="GetNumberOfRows"
+         information_only="1">
+         <IntRangeHelper/>
+      </IntVectorProperty>
+
+      <IntVectorProperty 
+         name="RowIndex" 
+         command="SetRowIndex" 
+         number_of_elements="1"
+         animateable="1"
+         default_values="0" > 
+        <Documentation>
+        </Documentation>
+        <IntRangeDomain name="range">
+           <RequiredProperties>
+              <Property name="NumberOfRows" function="Range"/>
+           </RequiredProperties>
+        </IntRangeDomain>
+      </IntVectorProperty>
+
+   </SourceProxy>
+
+  </ProxyGroup>
+   
+</ServerManagerConfiguration>
