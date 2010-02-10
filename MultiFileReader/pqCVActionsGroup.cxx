@@ -14,11 +14,19 @@
 ========================================================================*/
 #include "pqCVActionsGroup.h"
 
-#include "vtkObject.h"
+#include "vtkDelimitedTextWriter.h"
 #include "vtkPVDataInformation.h"
+#include "vtkSMClientDeliveryRepresentationProxy.h"
+#include "vtkSMInputProperty.h"
+#include "vtkSMObject.h"
+#include "vtkSMProxyManager.h"
+#include "vtkSmartPointer.h"
+#include "vtkTable.h"
 
 #include "pqActiveObjects.h"
 #include "pqOutputPort.h"
+#include "pqPipelineSource.h"
+#include "pqServer.h"
 
 //-----------------------------------------------------------------------------
 pqCVActionsGroup::pqCVActionsGroup(QObject* parentObject)
@@ -53,5 +61,37 @@ void pqCVActionsGroup::tableToDataCollection()
     return;
     }
   vtkGenericWarningMacro(<<di->GetDataClassName());
+  
+  // - Bring up a dialog to choose the column name
+
+  // - Get the table to client
+  vtkIdType connectionID = aos.activeServer()->GetConnectionID();
+  vtkSMClientDeliveryRepresentationProxy* cdrp = 
+    vtkSMClientDeliveryRepresentationProxy::SafeDownCast(
+      vtkSMObject::GetProxyManager()->NewProxy("representations", 
+                                             "ClientDeliveryRepresentation"));
+  if (!cdrp)
+    {
+    vtkGenericWarningMacro("Bummer!");
+    return;
+    }
+
+  vtkSMInputProperty* ip = vtkSMInputProperty::SafeDownCast(
+    cdrp->GetProperty("Input"));
+  ip->SetInputConnection(0, op->getSource()->getProxy(), op->getPortNumber());
+  
+  cdrp->Update();
+  
+  vtkSmartPointer<vtkDelimitedTextWriter> csvWriter = 
+    vtkSmartPointer<vtkDelimitedTextWriter>::New();
+  csvWriter->SetInput(cdrp->GetOutput());
+  csvWriter->WriteToOutputStringOn();
+  csvWriter->Write();
+  vtkGenericWarningMacro(<<csvWriter->RegisterAndGetOutputString());
+  // - Serialize the table to string
+  // - Create the FileCollectionReader
+  // - Set the table string
+  // - Set the column name
+  
 }
 
