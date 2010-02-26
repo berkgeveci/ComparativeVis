@@ -19,7 +19,13 @@ set_target_properties(MultiFileReader PROPERTIES PREFIX "")
 wrap_plugin_for_python(MultiFileReader ${MULTIFILE_READER_SRCS}) 
 
 if (PARAVIEW_BUILD_QT_GUI)
+
+  qt4_wrap_ui(UI_BUILT_SOURCES
+    pqCVColumnChooser.ui
+  )
+
   set (MULTIFILE_READER_GUI_SOURCES
+    ${UI_BUILT_SOURCES}
     pqCVPluginManager.cxx
     pqCVActionsGroup.cxx
     )

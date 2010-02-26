@@ -9,8 +9,7 @@
       <StringVectorProperty 
          name="Table" 
          command="SetTableFromString"
-         number_of_elements="1"
-         default_values="a,b,c &#xa;a,/Users/berk/foo.vtk,12&#xa;1,/Users/berk/bar.vtk,2">
+         number_of_elements="1">
         <Hints>
           <Widget type="multi_line"/>
         </Hints>
@@ -48,6 +47,12 @@
            </RequiredProperties>
         </IntRangeDomain>
       </IntVectorProperty>
+
+     <Hints>
+       <Property name="Table" show="0"/>
+       <Property name="FileNameColumn" show="0"/>
+       <View type="RenderView" />
+     </Hints>
 
    </SourceProxy>
 

@@ -15,18 +15,27 @@
 #include "pqCVActionsGroup.h"
 
 #include "vtkDelimitedTextWriter.h"
+#include "vtkPVArrayInformation.h"
 #include "vtkPVDataInformation.h"
+#include "vtkPVDataSetAttributesInformation.h"
 #include "vtkSMClientDeliveryRepresentationProxy.h"
 #include "vtkSMInputProperty.h"
 #include "vtkSMObject.h"
+#include "vtkSMPropertyHelper.h"
 #include "vtkSMProxyManager.h"
 #include "vtkSmartPointer.h"
 #include "vtkTable.h"
 
 #include "pqActiveObjects.h"
+#include "pqApplicationCore.h"
+#include "pqObjectBuilder.h"
 #include "pqOutputPort.h"
 #include "pqPipelineSource.h"
 #include "pqServer.h"
+
+#include "ui_pqCVColumnChooser.h"
+
+#include <QComboBox>
 
 //-----------------------------------------------------------------------------
 pqCVActionsGroup::pqCVActionsGroup(QObject* parentObject)
@@ -60,10 +69,7 @@ void pqCVActionsGroup::tableToDataCollection()
     {
     return;
     }
-  vtkGenericWarningMacro(<<di->GetDataClassName());
   
-  // - Bring up a dialog to choose the column name
-
   // - Get the table to client
   vtkIdType connectionID = aos.activeServer()->GetConnectionID();
   vtkSMClientDeliveryRepresentationProxy* cdrp = 
@@ -75,23 +81,65 @@ void pqCVActionsGroup::tableToDataCollection()
     vtkGenericWarningMacro("Bummer!");
     return;
     }
+    
+  // Use a smart pointer so that we don't have to worry about deleting
+  // after every return
+  vtkSmartPointer<vtkSMClientDeliveryRepresentationProxy> cdrp_s;
+  cdrp_s.TakeReference(cdrp);
 
   vtkSMInputProperty* ip = vtkSMInputProperty::SafeDownCast(
-    cdrp->GetProperty("Input"));
+    cdrp_s->GetProperty("Input"));
   ip->SetInputConnection(0, op->getSource()->getProxy(), op->getPortNumber());
   
-  cdrp->Update();
+  cdrp_s->Update();
   
+  // - Bring up a dialog to choose the column name
+  
+  QDialog myDialog;
+  Ui::pqCVColumnChooser ui;
+  ui.setupUi(&myDialog);
+  
+  vtkPVDataSetAttributesInformation* pdi = di->GetRowDataInformation();
+  int numArrays = pdi->GetNumberOfArrays();
+  const char* defaultValue = 0;
+  for (int i=0; i<numArrays; i++)
+    {
+    vtkPVArrayInformation* ai = pdi->GetArrayInformation(i);
+    if (ai->GetDataType() == VTK_STRING)
+      {
+      ui.comboBox->addItem(ai->GetName());
+      }
+    }
+  if (myDialog.exec() != QDialog::Accepted)
+    {
+    return;
+    }
+    
+  // - Serialize the table to string
+
   vtkSmartPointer<vtkDelimitedTextWriter> csvWriter = 
     vtkSmartPointer<vtkDelimitedTextWriter>::New();
-  csvWriter->SetInput(cdrp->GetOutput());
+  csvWriter->SetInput(cdrp_s->GetOutput());
   csvWriter->WriteToOutputStringOn();
   csvWriter->Write();
-  vtkGenericWarningMacro(<<csvWriter->RegisterAndGetOutputString());
-  // - Serialize the table to string
-  // - Create the FileCollectionReader
-  // - Set the table string
-  // - Set the column name
   
+  // - Create the FileCollectionReader
+  
+  pqApplicationCore* acore = pqApplicationCore::instance();
+  pqObjectBuilder* builder = acore->getObjectBuilder();
+  pqPipelineSource* reader = builder->createSource(
+    "sources", "FileCollectionReader", aos.activeServer());
+
+  // - Set the table string
+
+  char* tableStr = csvWriter->RegisterAndGetOutputString();
+  vtkSMPropertyHelper(reader->getProxy(), "Table").Set(tableStr);
+  delete[] tableStr;
+  
+  // - Set the column name
+  vtkstd::string col = ui.comboBox->currentText().toStdString();
+  vtkSMPropertyHelper(reader->getProxy(), "FileNameColumn").Set(col.c_str());
+  reader->getProxy()->UpdateVTKObjects();
+  reader->getProxy()->UpdatePropertyInformation();
 }
 

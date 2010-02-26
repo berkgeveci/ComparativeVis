@@ -21,6 +21,7 @@
 #include "vtkInformationVector.h"
 #include "vtkMyDelimitedTextReader.h"
 #include "vtkObjectFactory.h"
+#include "vtkSmartPointer.h"
 #include "vtkStdString.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
@@ -57,12 +58,15 @@ void vtkFileCollectionReader::SetTableFromString(const char* string)
 {
   this->Table->Initialize();
 
-  vtkMyDelimitedTextReader* reader = vtkMyDelimitedTextReader::New();
+  vtkSmartPointer<vtkMyDelimitedTextReader> reader = 
+    vtkSmartPointer<vtkMyDelimitedTextReader>::New();
   reader->SetInputString(string);
   reader->SetHaveHeaders(true);
   reader->Update();
 
   this->Table->ShallowCopy(reader->GetOutput());
+  
+  this->Modified();
 }
 
 int vtkFileCollectionReader::GetNumberOfRows()
@@ -74,7 +78,7 @@ int vtkFileCollectionReader::SetReaderFileName()
 {
   if (!this->FileNameColumn)
     {
-    vtkErrorMacro("The FileNameColumn was not specified.");
+    vtkDebugMacro("The FileNameColumn was not specified.");
     return 0;
     }
 
@@ -84,13 +88,13 @@ int vtkFileCollectionReader::SetReaderFileName()
     rowData->GetAbstractArray(this->FileNameColumn));
   if (!fileNames)
     {
-    vtkErrorMacro("There is no file name column");
+    vtkDebugMacro("There is no file name column");
     return 0;
     }
   
   if (this->RowIndex >= fileNames->GetNumberOfValues())
     {
-    vtkErrorMacro("RowIndex is too large. There are only " 
+    vtkDebugMacro("RowIndex is too large. There are only " 
       << fileNames->GetNumberOfValues() << " columns.");
     return 0;
     }
@@ -108,7 +112,14 @@ int vtkFileCollectionReader::RequestDataObject(
 {
   if (!this->SetReaderFileName())
     {
-    return 0;
+    // Create a dummy output instead of reporting errors.
+    // This is because we know that ParaView will call this
+    // function before the filename is set.
+    vtkInformation* info = outputVector->GetInformationObject(0);
+    vtkSmartPointer<vtkDataObject> dobj = 
+      vtkSmartPointer<vtkDataObject>::New();
+    dobj->SetPipelineInformation(info);
+    return 1;
     }
 
   return this->Reader->ProcessRequest(request, inputVector, outputVector);
@@ -119,7 +130,11 @@ int vtkFileCollectionReader::RequestInformation(
   vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
-  return this->Reader->ProcessRequest(request, inputVector, outputVector);
+  if (this->Reader->GetFileName())
+    {
+    return this->Reader->ProcessRequest(request, inputVector, outputVector);
+    }
+  return 1;
 }
 
 int vtkFileCollectionReader::RequestUpdateExtent(
