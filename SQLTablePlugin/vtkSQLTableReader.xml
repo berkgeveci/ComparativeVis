@@ -1,0 +1,24 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+
+    <SourceProxy name="TableReader" 
+                class="TableReader"
+                label="Database Table Reader">
+     <Documentation
+       short_help="Create a vtkTable from database."
+       long_help="Create a vtkTable from a database table.">
+       The Table reader creates a vtkTable from a database table. The database can either be specified locally as a .db file, or as a remote URI.
+     </Documentation>
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        animateable="0"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+        <Documentation>
+          This property specifies the file name for the Table reader.
+        </Documentation>
+     </StringVectorProperty>
+   </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

@@ -1,0 +1,4 @@
+<ParaViewReaders>
+  <Reader name="TableReader" extensions="db" file_description="Database Files">
+  </Reader>
+</ParaViewReaders>
