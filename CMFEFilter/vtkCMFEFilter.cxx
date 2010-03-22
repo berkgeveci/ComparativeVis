@@ -25,7 +25,8 @@
 #include "vtkStdString.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
-vtkCxxRevisionMacro(vtkCMFEFilter, "$Revision: 0.2$");
+#include <sstream>
+vtkCxxRevisionMacro(vtkCMFEFilter, "$Revision: 0.4$");
 vtkStandardNewMacro(vtkCMFEFilter);
 
 //----------------------------------------------------------------------------
@@ -94,9 +95,14 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
     vtkErrorMacro("Unable to find a property the user selected");
     return 0;
     }
+  
+  vtkStdString outputName = sourceProp->GetName();
+  if ( outputName == inputProp->GetName() )
+    {    
+    outputName +="result";        
+    }
 
-
-  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), inputProp->GetName(), "cmfeResultValue" );
+  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), inputProp->GetName(), outputName );
   
   output->ShallowCopy( temp );
   temp->Delete();
