@@ -1,0 +1,87 @@
+<ServerManagerConfiguration>  
+  <ProxyGroup name="filters">
+   <SourceProxy name="CMFEFilter" class="vtkCMFEFilter" label="CMFEFilter">
+     <InputProperty
+       name="Input"
+       command="SetInputConnection">
+          <ProxyGroupDomain name="groups">
+            <Group name="sources"/>
+            <Group name="filters"/>
+          </ProxyGroupDomain>
+          <DataTypeDomain name="input_type">
+            <DataType value="vtkDataSet"/>            
+          </DataTypeDomain>
+          <InputArrayDomain name="input_array" number_of_components="1">
+             <RequiredProperties>
+                <Property name="SelectInputScalars" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
+          <Documentation>
+            This property specifies the dataset from which to map from.
+          </Documentation>
+     </InputProperty>
+
+	 
+     <InputProperty
+        name="Source"
+        command="SetSourceConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+          <DataTypeDomain name="input_type">
+            <DataType value="vtkDataSet"/>
+          </DataTypeDomain>
+		  <InputArrayDomain name="input_array" number_of_components="1">
+             <RequiredProperties>
+                <Property name="SelectSourceScalars" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
+      </InputProperty>		
+
+     <StringVectorProperty 
+        name="SelectInputScalars" 
+        command="SetInputArrayToProcess"
+        number_of_elements="5"
+        element_types="0 0 0 0 2"
+        label="Input Scalars">
+           <ArrayListDomain name="array_list" 
+                            attribute_type="Scalars">
+             <RequiredProperties>
+                <Property name="Input" function="Input"/>
+             </RequiredProperties>
+           </ArrayListDomain>
+           <FieldDataDomain name="field_list">
+             <RequiredProperties>
+                <Property name="Input" function="Input"/>
+             </RequiredProperties>
+           </FieldDataDomain>          
+     </StringVectorProperty> 
+
+	 
+     <StringVectorProperty 
+        name="SelectSourceScalars" 
+        command="SetInputArrayToProcess"
+        number_of_elements="5"
+        element_types="0 0 0 0 2"
+		default_values="1 0 0 0 2"
+        label="Source Scalars">
+           <ArrayListDomain name="array_list" 
+                            attribute_type="Scalars">
+             <RequiredProperties>
+                <Property name="Source" function="Input"/>
+             </RequiredProperties>
+           </ArrayListDomain>
+           <FieldDataDomain name="field_list">
+             <RequiredProperties>
+                <Property name="Source" function="Input"/>
+             </RequiredProperties>
+           </FieldDataDomain>
+     </StringVectorProperty> 
+
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+
