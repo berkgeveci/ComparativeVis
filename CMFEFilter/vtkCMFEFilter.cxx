@@ -96,10 +96,10 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
     return 0;
     }
   
-  vtkStdString outputName = sourceProp->GetName();
-  if ( outputName == inputProp->GetName() )
+  vtkStdString outputName = inputProp->GetName();
+  if ( outputName == sourceProp->GetName() )
     {    
-    outputName +="result";        
+    outputName +="Result";        
     }
 
   vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), inputProp->GetName(), outputName );

@@ -46,6 +46,7 @@
         command="SetInputArrayToProcess"
         number_of_elements="5"
         element_types="0 0 0 0 2"
+        default_values="0 0 0 0 2"
         label="Input Scalars">
            <ArrayListDomain name="array_list" 
                             attribute_type="Scalars">
@@ -66,7 +67,7 @@
         command="SetInputArrayToProcess"
         number_of_elements="5"
         element_types="0 0 0 0 2"
-		default_values="1 0 0 0 2"
+        default_values="1 0 0 0 2"
         label="Source Scalars">
            <ArrayListDomain name="array_list" 
                             attribute_type="Scalars">
