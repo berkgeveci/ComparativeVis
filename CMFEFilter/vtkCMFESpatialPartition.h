@@ -74,18 +74,31 @@ class vtkCell;
 
 class vtkCMFESpatialPartition
 {
-  public:
-    vtkCMFESpatialPartition();
-    virtual ~vtkCMFESpatialPartition();
-    void CreatePartition(vtkCMFEDesiredPoints *, vtkCMFEFastLookupGrouping *, double *);
+public:
+  vtkCMFESpatialPartition();
+  virtual ~vtkCMFESpatialPartition();
+  void CreatePartition(vtkCMFEDesiredPoints *, vtkCMFEFastLookupGrouping *, double *);
 
-    int GetProcessor(float *);
-    int GetProcessor(vtkCell *);
-    void GetProcessorList(vtkCell *, vtkstd::vector<int> &);
-    void GetProcessorBoundaries(float *, vtkstd::vector<int> &, vtkstd::vector<float> &);
+  // Description:
+  //Get the processor that contains this point
+  int GetProcessor(float *point);
 
-  protected:
-    vtkCMFEIntervalTree  *IntervalTree;
+  // Description:
+  //Get the processor that contains this cell
+  int GetProcessor(vtkCell *cell);
+
+  // Description:
+  //Gets the processor that contains this cell.  This should be called
+  //when a list of processors contain a cell.
+  void GetProcessorList(vtkCell *cell, vtkstd::vector<int> &list);
+
+  // Description:
+  //Gets the processor that contains this cell.  This should be called
+  //when a list of processors contain a cell.
+  void GetProcessorBoundaries(float *bounds, vtkstd::vector<int> &list, vtkstd::vector<float> &db);
+
+protected:
+  vtkCMFEIntervalTree  *IntervalTree;
 
 private:
   vtkCMFESpatialPartition(const vtkCMFESpatialPartition&);  // Not implemented.
