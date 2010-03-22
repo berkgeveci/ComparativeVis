@@ -72,12 +72,60 @@ namespace
   {
       double f;
       int   b;
-  } FloatInt;
+  } DoubleInt;
 
   int globalCurrentDepth;
   int globalNDims;
 
-  int QsortBoundsSorter(const void *arg1, const void *arg2);
+  
+// ****************************************************************************
+//  Function: QsortBoundsSorter
+//
+//  Purpose:
+//      Sorts a vector of bounds with respect to the dimension that
+//      corresponds to the depth.
+//
+//  Notes:
+//     Adapted from deprecated methods 'Sort' and 'Less' written in 
+//     August of 2000.
+//
+//  Programmer: Hank Childs
+//  Creation:   June 27, 2005
+//
+//  Modifications:
+//
+//    Mark C. Miller, Wed Aug 23 08:53:58 PDT 2006
+//    Changed return values from true/false to 1, -1, 0
+// ****************************************************************************
+
+int QsortBoundsSorter(const void *arg1, const void *arg2)
+{
+  DoubleInt *A = (DoubleInt *) arg1;
+  DoubleInt *B = (DoubleInt *) arg2;
+
+  // Walk through the mid-points of the extents, starting with the current
+  // depth and moving forward.
+  int size = 2*globalNDims;
+  for (int i = 0 ; i < globalNDims ; i++)
+    {
+    double A_mid = (A[(2*globalCurrentDepth + 2*i) % size].f
+      + A[(2*globalCurrentDepth+1 + 2*i) % size].f) / 2;
+    double B_mid = (B[(2*globalCurrentDepth + 2*i) % size].f
+      + B[(2*globalCurrentDepth+1 + 2*i) % size].f) / 2;
+    if (A_mid < B_mid)
+      {
+      return 1;
+      }
+    else if (A_mid > B_mid)
+      {
+      return -1;
+      }
+    }
+
+  // Bounds are exactly identical.  This can cause problems if you are
+  // not careful.
+  return 0;
+}
 }
 
 
@@ -243,7 +291,7 @@ void vtkCMFEIntervalTree::ConstructTree(void)
   //
   int totalSize = this->VectorSize+1;
   globalNDims = this->NumberOfDims;
-  FloatInt  *bounds = new FloatInt[this->NumberOfElements*totalSize];
+  DoubleInt  *bounds = new DoubleInt[this->NumberOfElements*totalSize];
   for (i = 0 ; i < this->NumberOfElements ; i++)
     {
     for (j = 0 ; j < this->VectorSize ; j++)
@@ -297,7 +345,7 @@ void vtkCMFEIntervalTree::ConstructTree(void)
     globalCurrentDepth = currentDepth;
     if (count % thresh == 0)
       {
-      qsort(bounds + currentOffset*totalSize, currentSize, totalSize*sizeof(FloatInt), QsortBoundsSorter);
+      qsort(bounds + currentOffset*totalSize, currentSize, totalSize*sizeof(DoubleInt), QsortBoundsSorter);
       }
 
     leftSize = this->SplitSize(currentSize);
@@ -618,52 +666,3 @@ void vtkCMFEIntervalTree::GetElementExtents(int elementIndex, double *extents) c
     }
 }
 
-
-// ****************************************************************************
-//  Function: QsortBoundsSorter
-//
-//  Purpose:
-//      Sorts a vector of bounds with respect to the dimension that
-//      corresponds to the depth.
-//
-//  Notes:
-//     Adapted from deprecated methods 'Sort' and 'Less' written in 
-//     August of 2000.
-//
-//  Programmer: Hank Childs
-//  Creation:   June 27, 2005
-//
-//  Modifications:
-//
-//    Mark C. Miller, Wed Aug 23 08:53:58 PDT 2006
-//    Changed return values from true/false to 1, -1, 0
-// ****************************************************************************
-
-int QsortBoundsSorter(const void *arg1, const void *arg2)
-{
-    FloatInt *A = (FloatInt *) arg1;
-    FloatInt *B = (FloatInt *) arg2;
-
-    //
-    // Walk through the mid-points of the extents, starting with the current
-    // depth and moving forward.
-    //
-    int size = 2*globalNDims;
-    for (int i = 0 ; i < globalNDims ; i++)
-    {
-        double A_mid = (A[(2*globalCurrentDepth + 2*i) % size].f
-                       + A[(2*globalCurrentDepth+1 + 2*i) % size].f) / 2;
-        double B_mid = (B[(2*globalCurrentDepth + 2*i) % size].f
-                       + B[(2*globalCurrentDepth+1 + 2*i) % size].f) / 2;
-        if (A_mid < B_mid)
-            return 1;
-        else if (A_mid > B_mid)
-            return -1;
-    }
-
-    //
-    // Bounds are exactly identical.  This can cause problems if you are
-    // not careful.
-    //
-    return 0;
-}

@@ -73,6 +73,10 @@ class vtkCMFEAlgorithm
   public:
     static vtkDataSet* PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *sample_mesh,
       const vtkstd::string &invar,const vtkstd::string &default_var, const vtkstd::string &outvar);
+
+private:
+  vtkCMFEAlgorithm(const vtkCMFEAlgorithm&);  // Not implemented.
+  void operator=(const vtkCMFEAlgorithm&);  // Not implemented.
 };
 
 

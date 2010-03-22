@@ -74,7 +74,7 @@
 #include <mpi.h>
 #include <cstring>
 
-#define VTK_USE_MPI true
+
 
 static MPI_Op AVT_MPI_MINMAX = MPI_OP_NULL;
 static int mpiTagUpperBound = 32767;
@@ -183,6 +183,8 @@ bool CMFEUtility::UnifyMinMax(double *buff, int size)
     }
 
   delete [] rbuff;
+  return true;
+#else
   return true;
 #endif
 }

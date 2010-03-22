@@ -126,6 +126,11 @@ protected:
   int *MapToDataSet;
   int *DataSetStart;
   vtkstd::vector<int> ListFromLastSuccessfulSearch;
+
+
+private:
+  vtkCMFEFastLookupGrouping(const vtkCMFEFastLookupGrouping&);  // Not implemented.
+  void operator=(const vtkCMFEFastLookupGrouping&);  // Not implemented.
 };
   
 

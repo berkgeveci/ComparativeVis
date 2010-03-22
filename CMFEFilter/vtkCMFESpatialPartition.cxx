@@ -802,24 +802,22 @@ vtkCMFESpatialPartition::GetProcessor(vtkCell *cell)
 //
 // ****************************************************************************
 
-void
-vtkCMFESpatialPartition::GetProcessorList(vtkCell *cell,
-                                                        std::vector<int> &list)
+void vtkCMFESpatialPartition::GetProcessorList(vtkCell *cell,  std::vector<int> &list)
 {
-    list.clear();
+  list.clear();
 
-    double bounds[6];
-    cell->GetBounds(bounds);
-    double mins[3];
-    mins[0] = bounds[0];
-    mins[1] = bounds[2];
-    mins[2] = bounds[4];
-    double maxs[3];
-    maxs[0] = bounds[1];
-    maxs[1] = bounds[3];
-    maxs[2] = bounds[5];
+  double bounds[6];
+  cell->GetBounds(bounds);
+  double mins[3];
+  mins[0] = bounds[0];
+  mins[1] = bounds[2];
+  mins[2] = bounds[4];
+  double maxs[3];
+  maxs[0] = bounds[1];
+  maxs[1] = bounds[3];
+  maxs[2] = bounds[5];
 
-    this->IntervalTree->GetElementsListFromRange(mins, maxs, list);
+  this->IntervalTree->GetElementsListFromRange(mins, maxs, list);
 }
 
 
@@ -839,31 +837,29 @@ vtkCMFESpatialPartition::GetProcessorList(vtkCell *cell,
 //
 // ****************************************************************************
 
-void
-vtkCMFESpatialPartition::GetProcessorBoundaries(float *bounds,
-                                std::vector<int> &list, std::vector<float> &db)
+void vtkCMFESpatialPartition::GetProcessorBoundaries(float *bounds, std::vector<int> &list, std::vector<float> &db)
 {
-    list.clear();
+  list.clear();
 
-    double mins[3];
-    mins[0] = bounds[0];
-    mins[1] = bounds[2];
-    mins[2] = bounds[4];
-    double maxs[3];
-    maxs[0] = bounds[1];
-    maxs[1] = bounds[3];
-    maxs[2] = bounds[5];
+  double mins[3];
+  mins[0] = bounds[0];
+  mins[1] = bounds[2];
+  mins[2] = bounds[4];
+  double maxs[3];
+  maxs[0] = bounds[1];
+  maxs[1] = bounds[3];
+  maxs[2] = bounds[5];
 
-    this->IntervalTree->GetElementsListFromRange(mins, maxs, list);
+  this->IntervalTree->GetElementsListFromRange(mins, maxs, list);
 
-    int numMatches = list.size();
-    db.resize(numMatches*6);
-    for (int i = 0 ; i < numMatches ; i++)
+  int numMatches = list.size();
+  db.resize(numMatches*6);
+  for (int i = 0 ; i < numMatches ; i++)
     {
-        double domBounds[6];
-        this->IntervalTree->GetElementExtents(list[i], domBounds);
-        for (int j = 0 ; j < 6 ; j++)
-            db[6*i+j] = domBounds[j];
+    double domBounds[6];
+    this->IntervalTree->GetElementExtents(list[i], domBounds);
+    for (int j = 0 ; j < 6 ; j++)
+      db[6*i+j] = domBounds[j];
     }
 }
 

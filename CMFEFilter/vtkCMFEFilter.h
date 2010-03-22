@@ -16,10 +16,11 @@
 #ifndef __vtkCMFEFilter_h
 #define __vtkCMFEFilter_h
 
+#include "vtkCMFEExport.h"
 #include "vtkDataSetAlgorithm.h"
 #include "vtkMultiProcessController.h"
 
-class VTK_EXPORT vtkCMFEFilter : public vtkDataSetAlgorithm
+class CMFEFILTER_EXPORT vtkCMFEFilter : public vtkDataSetAlgorithm
 {
 public:
   static vtkCMFEFilter* New();

@@ -38,6 +38,27 @@ vtkCMFEIntervalTree.cxx
 vtkCMFEUtility.h
 vtkCMFEUtility.cxx
 )
+ 
+SET_SOURCE_FILES_PROPERTIES(
+vtkCMFEAlgorithm.h
+vtkCMFEAlgorithm.cxx
+vtkCMFEDesiredPoints.cxx
+vtkCMFEDesiredPoints.h
+vtkCMFEFastLookupGrouping.cxx
+vtkCMFEFastLookupGrouping.h
+vtkCMFESpatialPartition.cxx
+vtkCMFESpatialPartition.h
+vtkUnstructuredGridRelevantPointsFilter.cxx
+vtkUnstructuredGridRelevantPointsFilter.h
+vtkCMFEIntervalTree.h
+vtkCMFEIntervalTree.cxx
+vtkCMFEUtility.h
+vtkCMFEUtility.cxx
+WRAP_EXCLUDE)
+
+
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/vtkCMFEExport.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/vtkCMFEExport.h")
 
 ADD_PARAVIEW_PLUGIN(CMFEFilter "1.0"
   SERVER_MANAGER_SOURCES ${SERVER_SOURCES}

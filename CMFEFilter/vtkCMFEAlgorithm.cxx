@@ -101,33 +101,37 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
   vtkCMFEDesiredPoints dp(isNodal, numberOfComponents);
   dp.AddDataset( output_mesh );
 
-  double outBounds[6];
-  double meshBounds[6];
-  double bounds[6];
-  output_mesh->GetBounds( outBounds );
-  mesh_to_be_sampled->GetBounds( meshBounds );
-
-  for(int i=0; i < 6; i+=2)
-    {
-    bounds[i] = vtkstd::min(outBounds[i],meshBounds[i]);
-    bounds[i+1] = vtkstd::max(outBounds[i+1],meshBounds[i+1]);
-    }
-  CMFEUtility::UnifyMinMax(bounds,6);
-
-  // Need to "finalize" in pre-partitioned form so that the spatial
-  // partitioner can access their data.
-  dp.Finalize();
-
-  //
-  // There is no guarantee that the "dp" and "flg" overlap spatially.  It's
-  // likely that the parts of the "flg" mesh that the points in "dp" are
-  // interested in are located on different processors.  So we do a large
-  // communication phase to get all of the points on the right processors.
-  //    
   vtkCMFESpatialPartition spat_part;    
-  spat_part.CreatePartition(&dp, &flg, bounds);
-  dp.RelocatePointsUsingPartition(&spat_part);
-  flg.RelocateDataUsingPartition(&spat_part);
+  bool mpiOn =  (CMFEUtility::PAR_Size() > 1 );
+  if ( mpiOn )
+    {
+    double outBounds[6];
+    double meshBounds[6];
+    double bounds[6];
+    output_mesh->GetBounds( outBounds );
+    mesh_to_be_sampled->GetBounds( meshBounds );
+
+    for(int i=0; i < 6; i+=2)
+      {
+      bounds[i] = vtkstd::min(outBounds[i],meshBounds[i]);
+      bounds[i+1] = vtkstd::max(outBounds[i+1],meshBounds[i+1]);
+      }
+    CMFEUtility::UnifyMinMax(bounds,6);
+
+    // Need to "finalize" in pre-partitioned form so that the spatial
+    // partitioner can access their data.
+    dp.Finalize();
+
+    //
+    // There is no guarantee that the "dp" and "flg" overlap spatially.  It's
+    // likely that the parts of the "flg" mesh that the points in "dp" are
+    // interested in are located on different processors.  So we do a large
+    // communication phase to get all of the points on the right processors.
+    //    
+    spat_part.CreatePartition(&dp, &flg, bounds);
+    dp.RelocatePointsUsingPartition(&spat_part);
+    flg.RelocateDataUsingPartition(&spat_part);
+    }
 
   flg.Finalize();
   dp.Finalize();
@@ -155,7 +159,10 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
   // processors (see comments in sections above).  So now we need to
   // get the correct values back to this processor so that we can set
   // up the output variable array.  
-  dp.UnRelocatePoints(&spat_part);    
+  if ( mpiOn )
+    {
+    dp.UnRelocatePoints(&spat_part);    
+    }
 
 
   // Now create the variable that contains all of the values for the sample

@@ -73,9 +73,8 @@ protected:
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 private:
-  vtkUnstructuredGridRelevantPointsFilter
-       (const vtkUnstructuredGridRelevantPointsFilter&);
-  void operator=(const vtkUnstructuredGridRelevantPointsFilter&);
+  vtkUnstructuredGridRelevantPointsFilter(const vtkUnstructuredGridRelevantPointsFilter&);
+  void operator=(const vtkUnstructuredGridRelevantPointsFilter&);  
 };
 
 #endif

@@ -72,7 +72,6 @@
 class vtkCMFEIntervalTree;
 class vtkCell;
 
-
 class vtkCMFESpatialPartition
 {
   public:
@@ -87,6 +86,10 @@ class vtkCMFESpatialPartition
 
   protected:
     vtkCMFEIntervalTree  *IntervalTree;
+
+private:
+  vtkCMFESpatialPartition(const vtkCMFESpatialPartition&);  // Not implemented.
+  void operator=(const vtkCMFESpatialPartition&);  // Not implemented.
 };
 
 

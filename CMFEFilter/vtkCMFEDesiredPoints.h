@@ -154,6 +154,7 @@ private:
 
   vtkMultiProcessController *Controller;
   
+  //BTX
   vtkstd::vector<float *> pt_list;
   vtkstd::vector<int>  pt_list_size;
   vtkstd::vector<float *> rgrid_pts;
@@ -165,6 +166,7 @@ private:
   vtkstd::vector<int>  orig_rgrid_pts_size;
   vtkstd::vector<int>  pt_list_came_from;
   vtkstd::vector<int>  rgrid_came_from;
+  //ETX
   
   // Description:
   //Uses the spatial partition to determine which processors a rectilinear
@@ -172,6 +174,9 @@ private:
   void GetProcessorsForGrid(int, vtkstd::vector<int> &, vtkstd::vector<float> &, vtkCMFESpatialPartition *);
 
   bool GetSubgridForBoundary(int, float *, int *);
+
+  vtkCMFEDesiredPoints(const vtkCMFEDesiredPoints&);  // Not implemented.
+  void operator=(const vtkCMFEDesiredPoints&);  // Not implemented.
 };  
 
 #endif
