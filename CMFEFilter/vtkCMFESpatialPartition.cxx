@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   ParaView
-  Module:    $RCSfile: vtkCMFEFilter.cxx,v $
+  Module:    $RCSfile: vtkCMFESpatialPartition.cxx,v $
 
   Copyright (c) Kitware, Inc.
   All rights reserved.
@@ -70,11 +70,6 @@
 //
 //  Programmer: Hank Childs
 //  Creation:   January 9, 2006
-//
-//  Modifications:
-//
-//    Hank Childs, Sat Mar 18 10:15:23 PST 2006
-//    Add support for rectilinear grids.
 //
 // ****************************************************************************
 
