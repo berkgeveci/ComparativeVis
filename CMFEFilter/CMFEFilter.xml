@@ -2,7 +2,7 @@
   <ProxyGroup name="filters">
    <SourceProxy name="CMFEFilter" class="vtkCMFEFilter" label="CMFEFilter">
      <InputProperty
-       name="Input"
+       name="Input Mesh"
        command="SetInputConnection">
           <ProxyGroupDomain name="groups">
             <Group name="sources"/>
@@ -24,7 +24,7 @@
 
 	 
      <InputProperty
-        name="Source"
+        name="Output Mesh"
         command="SetSourceConnection">
            <ProxyGroupDomain name="groups">
              <Group name="sources"/>
@@ -39,6 +39,9 @@
                           function="FieldDataSelection"/>
              </RequiredProperties>
           </InputArrayDomain>
+          <Documentation>
+            This property specifies the dataset from which to map to.
+          </Documentation>
       </InputProperty>		
 
      <StringVectorProperty 

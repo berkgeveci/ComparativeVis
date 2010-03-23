@@ -33,10 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _vtkCMFEExport_h
 #define _vtkCMFEExport_h
 
-#ifndef VTK_USE_MPI
-#cmakedefine VTK_USE_MPI
-#endif
-
 #ifndef PARAVIEW_BUILD_SHARED_LIBS
 #cmakedefine PARAVIEW_BUILD_SHARED_LIBS
 #endif

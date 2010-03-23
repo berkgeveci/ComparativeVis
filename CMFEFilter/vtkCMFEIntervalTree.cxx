@@ -57,7 +57,6 @@
 
 #include <vtkstd/algorithm>
 #include <float.h>
-#include <mpi.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -271,7 +270,7 @@ void vtkCMFEIntervalTree::CollectInformation(void)
   int totalElements = this->NumberOfElements*this->VectorSize;
   double *outBuff = new double[totalElements];
   MPI_Allreduce(this->NodeExtents, outBuff, totalElements, MPI_DOUBLE, MPI_SUM,
-                MPI_COMM_WORLD);
+                *CMFEUtility::GetMPIComm());
 
   for (int i = 0 ; i < totalElements ; i++)
     {

@@ -62,8 +62,7 @@
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkMultiProcessController.h>
-#include <vtkMPICommunicator.h>
+#include <vtkToolkits.h>
 
 #include <float.h>
 #include <vtkstd/algorithm>
@@ -75,15 +74,20 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
   int pointProperty;
   int numberOfComponents;
 
+  //setup all the mpi related information
+  CMFEUtility::Setup();
+
   if ( mesh_to_be_sampled->GetPointData()->HasArray( mesh_var.c_str() ) )
     {
     pointProperty = 1;
-    numberOfComponents = mesh_to_be_sampled->GetPointData()->GetArray( mesh_var.c_str() )->GetNumberOfComponents();
+    numberOfComponents = mesh_to_be_sampled->GetPointData()->GetArray(
+      mesh_var.c_str() )->GetNumberOfComponents();
     }
   else
     {
     pointProperty = 0;
-    numberOfComponents =  mesh_to_be_sampled->GetCellData()->GetArray( mesh_var.c_str() )->GetNumberOfComponents();
+    numberOfComponents =  mesh_to_be_sampled->GetCellData()->GetArray( 
+      mesh_var.c_str() )->GetNumberOfComponents();
     }
 
   //make sure we have the updated values on all processors
@@ -102,8 +106,9 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
   dp.AddDataset( output_mesh );
 
   vtkCMFESpatialPartition spat_part;    
-  bool mpiOn =  (CMFEUtility::PAR_Size() > 1 );
-  if ( mpiOn )
+
+#ifdef VTK_USE_MPI
+  if ( CMFEUtility::PAR_Size() > 1 )
     {
     double outBounds[6];
     double meshBounds[6];
@@ -132,6 +137,7 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
     dp.RelocatePointsUsingPartition(&spat_part);
     flg.RelocateDataUsingPartition(&spat_part);
     }
+#endif  
 
   flg.Finalize();
   dp.Finalize();
@@ -159,10 +165,12 @@ vtkDataSet* vtkCMFEAlgorithm::PerformCMFE(vtkDataSet *output_mesh, vtkDataSet *m
   // processors (see comments in sections above).  So now we need to
   // get the correct values back to this processor so that we can set
   // up the output variable array.  
-  if ( mpiOn )
+#ifdef VTK_USE_MPI
+  if ( CMFEUtility::PAR_Size() > 1 )
     {
     dp.UnRelocatePoints(&spat_part);    
     }
+#endif
 
 
   // Now create the variable that contains all of the values for the sample

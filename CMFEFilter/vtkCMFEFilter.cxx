@@ -71,8 +71,10 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   // get the input and output
-  vtkDataSet *input = vtkDataSet::SafeDownCast( inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkDataSet *source = vtkDataSet::SafeDownCast( sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet *input = vtkDataSet::SafeDownCast( 
+    inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet *source = vtkDataSet::SafeDownCast( 
+    sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkDataSet *output = vtkDataSet::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
@@ -84,8 +86,10 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
     }
 
   //get the input arrays to mesh  
-  vtkDataArray *inputProp = this->GetInputArrayToProcess(0,inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkDataArray *sourceProp = this->GetInputArrayToProcess(1,sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataArray *inputProp = this->GetInputArrayToProcess(0,
+    inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataArray *sourceProp = this->GetInputArrayToProcess(1,
+    sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
 
  
 
@@ -101,7 +105,8 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
     outputName +="Result";        
     }
 
-  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), inputProp->GetName(), outputName );
+  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), 
+    inputProp->GetName(), outputName );
   
   output->ShallowCopy( temp );
   temp->Delete();

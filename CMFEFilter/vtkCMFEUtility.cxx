@@ -57,30 +57,31 @@
 #include <vtkCell.h>
 #include <vtkCellData.h>
 #include <vtkCharArray.h>
+#include <vtkDataSetWriter.h>
 #include <vtkDoubleArray.h>
 #include <vtkFloatArray.h>
 #include <vtkGenericCell.h>
 #include <vtkHexahedron.h>
 #include <vtkIntArray.h>
+#include <vtkMPICommunicator.h>
+#include <vtkMultiProcessController.h>
 #include <vtkPointData.h>
 #include <vtkPointSet.h>
 #include <vtkRectilinearGrid.h>
 #include <vtkShortArray.h>
 #include <vtkStructuredGrid.h>
-#include <vtkDataSetWriter.h>
+#include <vtkToolkits.h>
 
-
-#include <vtkMultiProcessController.h>
-#include <mpi.h>
 #include <cstring>
-
-
+  
+#ifdef VTK_USE_MPI
 namespace
   {  
-  static MPI_Op MPI_MINMAX_FUNC = MPI_OP_NULL;
-  static int mpiTagUpperBound = 32767;
-  static int numberOfProcessors = -1;
-  bool MPI_ON = false;
+  //this namespace is only needed if we have mpi support
+  static MPI_Op MPI_MINMAX_FUNC = MPI_OP_NULL;  
+  static int numberOfProcesses = 1;
+  static bool mpiOn = true;
+  MPI_Comm *comm;
 
 //----------------------------------------------------------------------------
 static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
@@ -115,6 +116,7 @@ static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
     }
     return;
 }
+#endif
 
 //----------------------------------------------------------------------------
 double EquationsValueAtPoint(const double *params, int block, int point, int nDims, const double *nodeExtents)
@@ -152,20 +154,55 @@ double EquationsValueAtPoint(const double *params, int block, int point, int nDi
   }
 
 //----------------------------------------------------------------------------
+void CMFEUtility::Setup( )
+{
+#ifdef VTK_USE_MPI
+  vtkMultiProcessController *controller = vtkMultiProcessController::GetGlobalController();
+  vtkMPICommunicator *communicator = vtkMPICommunicator::SafeDownCast( 
+    controller->GetCommunicator() );
+
+  if ( communicator )
+    {
+    numberOfProcesses = communicator->GetNumberOfProcesses();    
+    comm = communicator->GetMPIComm()->GetHandle();
+    mpiOn = true;
+    }
+  else
+    {    
+    numberOfProcesses = 1;
+    comm = NULL;
+    mpiOn = false;
+    }
+#endif
+}
+
+//----------------------------------------------------------------------------
+MPI_Comm* CMFEUtility::GetMPIComm()
+  {
+#ifdef VTK_USE_MPI
+  return  comm;
+#else
+  return NULL;
+#endif
+  }
+
+//----------------------------------------------------------------------------
 int CMFEUtility::PAR_Size(void)
 {
-  if ( numberOfProcessors == -1 )
-    {
-    numberOfProcessors = vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses(); 
-    MPI_ON = ( numberOfProcessors > 1 );
-    }
-  return numberOfProcessors;
+#ifdef VTK_USE_MPI
+  return numberOfProcesses;    
+#else
+  return 1;
+#endif
 }
 
 //----------------------------------------------------------------------------
 bool CMFEUtility::UnifyMinMax(double *buff, int size)
 {
-  if ( MPI_ON )
+//have to make sure that the user is running with mpi compiled, and than
+//make sure they are running not in standalone mode
+#ifdef VTK_USE_MPI
+  if ( mpiOn ) 
     {
     // if it hasn't been created yet, create the min/max MPI reduction operator
     if (MPI_MINMAX_FUNC == MPI_OP_NULL)
@@ -180,7 +217,7 @@ bool CMFEUtility::UnifyMinMax(double *buff, int size)
 
     double *rbuff;
     rbuff = new double[size];
-    MPI_Allreduce(buff, rbuff, size, MPI_DOUBLE, MPI_MINMAX_FUNC, MPI_COMM_WORLD);
+    MPI_Allreduce(buff, rbuff, size, MPI_DOUBLE, MPI_MINMAX_FUNC, *CMFEUtility::GetMPIComm());
     
     // put the reduced results back into buff
     for (int i = 0; i < size ; i++)
@@ -189,62 +226,70 @@ bool CMFEUtility::UnifyMinMax(double *buff, int size)
       }
 
     delete [] rbuff;
-    return true;
+    return true;    
     }
+#endif
   return true;
 }
 
 //----------------------------------------------------------------------------
 float CMFEUtility::UnifyMinimumValue(float value)
 {
-  if ( MPI_ON )
+#ifdef VTK_USE_MPI
+  if ( mpiOn ) 
     {
     float allmin;
-    MPI_Allreduce(&value, &allmin, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce(&value, &allmin, 1, MPI_FLOAT, MPI_MIN, *CMFEUtility::GetMPIComm());
     return allmin;
     }
+#endif  
   return value;
-
 }
 
 //----------------------------------------------------------------------------
 float CMFEUtility::UnifyMaximumValue(float value)
 {
-  if ( MPI_ON )
+#ifdef VTK_USE_MPI
+  if ( mpiOn ) 
     {
     float allmax;
-    MPI_Allreduce(&value, &allmax, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD);
-    return allmax;
+    MPI_Allreduce(&value, &allmax, 1, MPI_FLOAT, MPI_MAX, *CMFEUtility::GetMPIComm());
+    return allmax;    
     }
+#endif
   return value;
 }
 
 //----------------------------------------------------------------------------
 int CMFEUtility::SumIntAcrossAllProcessors(int value)
 {
-  if ( MPI_ON )
+#ifdef VTK_USE_MPI
+  if ( mpiOn ) 
     {
     int sum;
-    MPI_Allreduce(&value, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&value, &sum, 1, MPI_INT, MPI_SUM, *CMFEUtility::GetMPIComm());
     return sum;
     }
+#endif
   return value;
 }
 
 //----------------------------------------------------------------------------
 void CMFEUtility::SumIntArrayAcrossAllProcessors(int *inArray, int *outArray, int size)
 {
-  if ( MPI_ON )
+#ifdef VTK_USE_MPI
+  if ( mpiOn ) 
     {
-    MPI_Allreduce(inArray, outArray, size, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(inArray, outArray, size, MPI_INT, MPI_SUM, *CMFEUtility::GetMPIComm());
+    return;
     }
-  else
+  //fall through for both compiled && enabled
+#endif
+  for (int i = 0 ; i < size ; i++)
     {
-    for (int i = 0 ; i < size ; i++)
-      {
-      outArray[i] = inArray[i];
-      }
+    outArray[i] = inArray[i];
     }
+  return;
 }
 
 //----------------------------------------------------------------------------

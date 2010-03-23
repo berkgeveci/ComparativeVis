@@ -82,7 +82,7 @@
 
 class vtkCMFESpatialPartition;
 class vtkDataSet;
-class vtkMultiProcessController;
+
 
 class vtkCMFEDesiredPoints
 {
@@ -151,8 +151,6 @@ private:
   int *MapToDataSets;
   int *DataSetStartIndices;
   float *Values;
-
-  vtkMultiProcessController *Controller;
   
   //BTX
   vtkstd::vector<float *> pt_list;

@@ -74,7 +74,6 @@
 #include "vtkUnstructuredGridRelevantPointsFilter.h"
 #include "vtkUnstructuredGridWriter.h"
 
-#include <mpi.h>
 
 //----------------------------------------------------------------------------
 vtkCMFEFastLookupGrouping::vtkCMFEFastLookupGrouping(vtkStdString v,
@@ -415,7 +414,7 @@ void vtkCMFEFastLookupGrouping::RelocateDataUsingPartition( vtkCMFESpatialPartit
   delete [] msg_tmp;
 
   int *recvcount = new int[nProcs];
-  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, MPI_COMM_WORLD);
+  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -432,7 +431,7 @@ void vtkCMFEFastLookupGrouping::RelocateDataUsingPartition( vtkCMFESpatialPartit
 
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
-                MPI_COMM_WORLD);
+                *CMFEUtility::GetMPIComm());
   delete [] sendcount;
   delete [] senddisp;
   delete [] big_send_msg;

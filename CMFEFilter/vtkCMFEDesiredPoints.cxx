@@ -61,11 +61,8 @@
 #include "vtkCMFEUtility.h"
 #include "vtkDataArray.h"
 #include "vtkDataSet.h"
-#include "vtkMultiProcessController.h"
-#include "vtkMPICommunicator.h"
 #include "vtkRectilinearGrid.h"
 
-#include <mpi.h>
 #include <math.h>
 
 //----------------------------------------------------------------------------
@@ -78,8 +75,7 @@ vtkCMFEDesiredPoints::vtkCMFEDesiredPoints(bool isN, int nc)
   this->Values      = NULL;
   this->TotalNumberOfValues  = 0;
   this->NumberOfDatasets = 0;
-  this->NumberOfGrids   = 0;  
-  this->Controller = vtkMultiProcessController::GetGlobalController();
+  this->NumberOfGrids   = 0;    
 }
 
 //----------------------------------------------------------------------------
@@ -96,11 +92,6 @@ vtkCMFEDesiredPoints::~vtkCMFEDesiredPoints()
   for (int i = 0 ; i < this->rgrid_pts.size() ; ++i)
     {
     delete [] this->rgrid_pts[i];
-    }
-
-  if ( this->Controller )
-    {
-    this->Controller = 0;
     }
 }
 
@@ -475,7 +466,7 @@ bool vtkCMFEDesiredPoints::GetSubgridForBoundary(int grid, float *bounds, int *e
 void vtkCMFEDesiredPoints::RelocatePointsUsingPartition( vtkCMFESpatialPartition *spat_part)
 {
   int   i, j, k;      
-  int   nProcs = this->Controller->GetNumberOfProcesses();
+  int   nProcs = CMFEUtility::PAR_Size();
   
   // Start off by assessing how much data needs to be sent, and to where. 
   vtkstd::vector<int> pt_cts(nProcs, 0);
@@ -623,7 +614,7 @@ void vtkCMFEDesiredPoints::RelocatePointsUsingPartition( vtkCMFESpatialPartition
 
   int *recvcount = new int[nProcs];
 
-  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, MPI_COMM_WORLD);
+  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -640,7 +631,7 @@ void vtkCMFEDesiredPoints::RelocatePointsUsingPartition( vtkCMFESpatialPartition
 
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
-                MPI_COMM_WORLD);
+                *CMFEUtility::GetMPIComm());
   delete [] sendcount;
   delete [] senddisp;
   delete [] big_send_msg;
@@ -737,7 +728,7 @@ void vtkCMFEDesiredPoints::UnRelocatePoints( vtkCMFESpatialPartition *spat_part)
 {
   int   i, j, k;
 
-  int   nProcs = this->Controller->GetNumberOfProcesses();
+  int   nProcs = CMFEUtility::PAR_Size();
 
   // Clean up the current points and restore the "orig" points.
   // Do this first, because it will buy us a little memory in case we're
@@ -803,7 +794,7 @@ void vtkCMFEDesiredPoints::UnRelocatePoints( vtkCMFESpatialPartition *spat_part)
     }
 
   int *recvcount = new int[nProcs];
-  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, MPI_COMM_WORLD);
+  MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -820,7 +811,7 @@ void vtkCMFEDesiredPoints::UnRelocatePoints( vtkCMFESpatialPartition *spat_part)
 
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
-                MPI_COMM_WORLD);
+                *CMFEUtility::GetMPIComm());
   delete [] sendcount;
   delete [] senddisp;
 

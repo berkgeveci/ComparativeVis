@@ -58,9 +58,19 @@ class vtkCell;
 class vtkDataSet;
 class vtkPoints;
 class vtkRectilinearGrid;
+#include <vtkMPI.h>
 
 namespace CMFEUtility
 {
+  // Description:
+  //Called first to setup all the parallel information including what
+  //world we are in, and the number of processors in that world
+  void Setup();
+
+  // Description:
+  //returns the mpi commuinicator we should be using
+  MPI_Comm* GetMPIComm();
+
   // Description:
   // Get the number of processors 
   int PAR_Size(void);
