@@ -75,13 +75,13 @@
 #include <cstring>
 
 
-
-static MPI_Op AVT_MPI_MINMAX = MPI_OP_NULL;
-static int mpiTagUpperBound = 32767;
-
-
 namespace
-  {
+  {  
+  static MPI_Op MPI_MINMAX_FUNC = MPI_OP_NULL;
+  static int mpiTagUpperBound = 32767;
+  static int numberOfProcessors = -1;
+  bool MPI_ON = false;
+
 //----------------------------------------------------------------------------
 static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
 {
@@ -154,88 +154,97 @@ double EquationsValueAtPoint(const double *params, int block, int point, int nDi
 //----------------------------------------------------------------------------
 int CMFEUtility::PAR_Size(void)
 {
-  return vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses();    
+  if ( numberOfProcessors == -1 )
+    {
+    numberOfProcessors = vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses(); 
+    MPI_ON = ( numberOfProcessors > 1 );
+    }
+  return numberOfProcessors;
 }
 
 //----------------------------------------------------------------------------
 bool CMFEUtility::UnifyMinMax(double *buff, int size)
 {
-#ifdef VTK_USE_MPI
-  // if it hasn't been created yet, create the min/max MPI reduction operator
-  if (AVT_MPI_MINMAX == MPI_OP_NULL)
+  if ( MPI_ON )
     {
-    MPI_Op_create(MinMaxOp, true, &AVT_MPI_MINMAX);
-    }
-   
-  if (size % 2 != 0)
-    {
-    return false;
-    }
+    // if it hasn't been created yet, create the min/max MPI reduction operator
+    if (MPI_MINMAX_FUNC == MPI_OP_NULL)
+      {
+      MPI_Op_create(MinMaxOp, true, &MPI_MINMAX_FUNC);
+      }
+     
+    if (size % 2 != 0)
+      {
+      return false;
+      }
 
-  double *rbuff;
-  rbuff = new double[size];
-  MPI_Allreduce(buff, rbuff, size, MPI_DOUBLE, AVT_MPI_MINMAX, MPI_COMM_WORLD);
-  
-  // put the reduced results back into buff
-  for (int i = 0; i < size ; i++)
-    {
-    buff[i] = rbuff[i];
-    }
+    double *rbuff;
+    rbuff = new double[size];
+    MPI_Allreduce(buff, rbuff, size, MPI_DOUBLE, MPI_MINMAX_FUNC, MPI_COMM_WORLD);
+    
+    // put the reduced results back into buff
+    for (int i = 0; i < size ; i++)
+      {
+      buff[i] = rbuff[i];
+      }
 
-  delete [] rbuff;
+    delete [] rbuff;
+    return true;
+    }
   return true;
-#else
-  return true;
-#endif
 }
 
 //----------------------------------------------------------------------------
 float CMFEUtility::UnifyMinimumValue(float value)
 {
-#ifdef VTK_USE_MPI
-  float allmin;
-  MPI_Allreduce(&value, &allmin, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD);
-  return allmin;
-#else
+  if ( MPI_ON )
+    {
+    float allmin;
+    MPI_Allreduce(&value, &allmin, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD);
+    return allmin;
+    }
   return value;
-#endif
+
 }
 
 //----------------------------------------------------------------------------
 float CMFEUtility::UnifyMaximumValue(float value)
 {
-#ifdef VTK_USE_MPI
-  float allmax;
-  MPI_Allreduce(&value, &allmax, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD);
-  return allmax;
-#else
+  if ( MPI_ON )
+    {
+    float allmax;
+    MPI_Allreduce(&value, &allmax, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD);
+    return allmax;
+    }
   return value;
-#endif
 }
 
 //----------------------------------------------------------------------------
 int CMFEUtility::SumIntAcrossAllProcessors(int value)
 {
-#ifdef VTK_USE_MPI
+  if ( MPI_ON )
+    {
     int sum;
     MPI_Allreduce(&value, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     return sum;
-#else
+    }
   return value;
-#endif
 }
 
 //----------------------------------------------------------------------------
 void CMFEUtility::SumIntArrayAcrossAllProcessors(int *inArray, int *outArray, int size)
 {
-#ifdef VTK_USE_MPI
-  MPI_Allreduce(inArray, outArray, size, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#else
-  for (int i = 0 ; i < size ; i++)
-  {
+  if ( MPI_ON )
+    {
+    MPI_Allreduce(inArray, outArray, size, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    }
+  else
+    {
+    for (int i = 0 ; i < size ; i++)
+      {
       outArray[i] = inArray[i];
-  }
-#endif
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
