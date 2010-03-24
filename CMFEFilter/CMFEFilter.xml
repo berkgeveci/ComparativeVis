@@ -54,12 +54,12 @@
            <ArrayListDomain name="array_list" 
                             attribute_type="Scalars">
              <RequiredProperties>
-                <Property name="Input" function="Input"/>
+                <Property name="Input Mesh" function="Input"/>
              </RequiredProperties>
            </ArrayListDomain>
            <FieldDataDomain name="field_list">
              <RequiredProperties>
-                <Property name="Input" function="Input"/>
+                <Property name="Input Mesh" function="Input"/>
              </RequiredProperties>
            </FieldDataDomain>          
      </StringVectorProperty> 
@@ -75,12 +75,12 @@
            <ArrayListDomain name="array_list" 
                             attribute_type="Scalars">
              <RequiredProperties>
-                <Property name="Source" function="Input"/>
+                <Property name="Output Mesh" function="Input"/>
              </RequiredProperties>
            </ArrayListDomain>
            <FieldDataDomain name="field_list">
              <RequiredProperties>
-                <Property name="Source" function="Input"/>
+                <Property name="Output Mesh" function="Input"/>
              </RequiredProperties>
            </FieldDataDomain>
      </StringVectorProperty> 

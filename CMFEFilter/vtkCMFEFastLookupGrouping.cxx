@@ -270,7 +270,6 @@ bool vtkCMFEFastLookupGrouping::GetValueUsingList(vtkstd::vector<int> &list, con
 void vtkCMFEFastLookupGrouping::RelocateDataUsingPartition( vtkCMFESpatialPartition *spat_part)
 {
   int  i, j, k;
-
   int   nProcs = CMFEUtility::PAR_Size();
 
   vtkUnstructuredGrid **meshForProcP = new vtkUnstructuredGrid*[nProcs];
@@ -414,7 +413,9 @@ void vtkCMFEFastLookupGrouping::RelocateDataUsingPartition( vtkCMFESpatialPartit
   delete [] msg_tmp;
 
   int *recvcount = new int[nProcs];
+#ifdef VTK_USE_MPI
   MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
+#endif
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -428,10 +429,11 @@ void vtkCMFEFastLookupGrouping::RelocateDataUsingPartition( vtkCMFESpatialPartit
     senddisp[j] = sendcount[j-1] + senddisp[j-1];
     recvdisp[j] = recvcount[j-1] + recvdisp[j-1];
     }
-
+#ifdef VTK_USE_MPI
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
                 *CMFEUtility::GetMPIComm());
+#endif
   delete [] sendcount;
   delete [] senddisp;
   delete [] big_send_msg;

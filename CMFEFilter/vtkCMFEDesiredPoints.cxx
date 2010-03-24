@@ -614,7 +614,9 @@ void vtkCMFEDesiredPoints::RelocatePointsUsingPartition( vtkCMFESpatialPartition
 
   int *recvcount = new int[nProcs];
 
+#ifdef VTK_USE_MPI
   MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
+#endif
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -628,10 +630,11 @@ void vtkCMFEDesiredPoints::RelocatePointsUsingPartition( vtkCMFESpatialPartition
     senddisp[j] = sendcount[j-1] + senddisp[j-1];
     recvdisp[j] = recvcount[j-1] + recvdisp[j-1];
     }
-
+#ifdef VTK_USE_MPI
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
                 *CMFEUtility::GetMPIComm());
+#endif
   delete [] sendcount;
   delete [] senddisp;
   delete [] big_send_msg;
@@ -794,7 +797,9 @@ void vtkCMFEDesiredPoints::UnRelocatePoints( vtkCMFESpatialPartition *spat_part)
     }
 
   int *recvcount = new int[nProcs];
+#ifdef VTK_USE_MPI
   MPI_Alltoall(sendcount, 1, MPI_INT, recvcount, 1, MPI_INT, *CMFEUtility::GetMPIComm());
+#endif
 
   char **recvmessages = new char*[nProcs];
   char *big_recv_msg = CMFEUtility::CreateMessageStrings(recvmessages, recvcount, nProcs);
@@ -808,10 +813,11 @@ void vtkCMFEDesiredPoints::UnRelocatePoints( vtkCMFESpatialPartition *spat_part)
     senddisp[j] = sendcount[j-1] + senddisp[j-1];
     recvdisp[j] = recvcount[j-1] + recvdisp[j-1];
     }
-
+#ifdef VTK_USE_MPI
   MPI_Alltoallv(big_send_msg, sendcount, senddisp, MPI_CHAR,
                 big_recv_msg, recvcount, recvdisp, MPI_CHAR,
                 *CMFEUtility::GetMPIComm());
+#endif
   delete [] sendcount;
   delete [] senddisp;
 

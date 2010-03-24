@@ -267,6 +267,7 @@ void vtkCMFEIntervalTree::CollectInformation(void)
   // initialized to have value 0., we can do an MPI_SUM and get the correct
   // list on processor 0.
   //
+#ifdef VTK_USE_MPI
   int totalElements = this->NumberOfElements*this->VectorSize;
   double *outBuff = new double[totalElements];
   MPI_Allreduce(this->NodeExtents, outBuff, totalElements, MPI_DOUBLE, MPI_SUM,
@@ -277,6 +278,7 @@ void vtkCMFEIntervalTree::CollectInformation(void)
     this->NodeExtents[i] = outBuff[i];
     }
   delete [] outBuff;
+#endif
 }
 
 

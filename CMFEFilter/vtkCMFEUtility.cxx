@@ -74,18 +74,18 @@
 
 #include <cstring>
   
-#ifdef VTK_USE_MPI
+
 namespace
   {  
-  //this namespace is only needed if we have mpi support
+#ifdef VTK_USE_MPI  
   static MPI_Op MPI_MINMAX_FUNC = MPI_OP_NULL;  
   static int numberOfProcesses = 1;
   static bool mpiOn = true;
   MPI_Comm *comm;
 
-//----------------------------------------------------------------------------
-static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
-{
+  //----------------------------------------------------------------------------
+  static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
+  {
     int i;
     double *iovals = (double *) iobuf;
     double  *ivals = (double *) ibuf;
@@ -115,43 +115,44 @@ static void MinMaxOp(void *ibuf, void *iobuf, int *len, MPI_Datatype *dtype)
             iovals[i] = ivals[i];
     }
     return;
-}
-#endif
-
-//----------------------------------------------------------------------------
-double EquationsValueAtPoint(const double *params, int block, int point, int nDims, const double *nodeExtents)
-{
-  static int  encoding[32];
-  static bool firstTimeThrough = true;
-  if (firstTimeThrough)
-    {
-    encoding[0] = 1;
-    for (int i = 1 ; i < 32 ; i++)
-      {
-      encoding[i] = encoding[i-1] << 1;
-      }
-    }
-
-  double rv = 0;
-  for (int i = 0 ; i < nDims ; i++)
-    {
-    if (point & encoding[i])
-      {
-      // The encoded point wants us to take the maximum extent for this
-      // dimension.
-      rv += params[i] * nodeExtents[block*nDims*2 + 2*i + 1];
-      }
-    else
-      {
-      // The encoded point wants us to take the minimum extent for this
-      // dimension.
-      rv += params[i] * nodeExtents[block*nDims*2 + 2*i];
-      }
-    }
-
-    return rv;
-}
   }
+#endif
+  //----------------------------------------------------------------------------
+  double EquationsValueAtPoint(const double *params, int block, int point, int nDims, const double *nodeExtents)
+  {
+    static int  encoding[32];
+    static bool firstTimeThrough = true;
+    if (firstTimeThrough)
+      {
+      encoding[0] = 1;
+      for (int i = 1 ; i < 32 ; i++)
+        {
+        encoding[i] = encoding[i-1] << 1;
+        }
+      }
+
+    double rv = 0;
+    for (int i = 0 ; i < nDims ; i++)
+      {
+      if (point & encoding[i])
+        {
+        // The encoded point wants us to take the maximum extent for this
+        // dimension.
+        rv += params[i] * nodeExtents[block*nDims*2 + 2*i + 1];
+        }
+      else
+        {
+        // The encoded point wants us to take the minimum extent for this
+        // dimension.
+        rv += params[i] * nodeExtents[block*nDims*2 + 2*i];
+        }
+      }
+
+      return rv;
+    }
+}
+
+
 
 //----------------------------------------------------------------------------
 void CMFEUtility::Setup( )
@@ -176,15 +177,13 @@ void CMFEUtility::Setup( )
 #endif
 }
 
+#ifdef VTK_USE_MPI
 //----------------------------------------------------------------------------
 MPI_Comm* CMFEUtility::GetMPIComm()
   {
-#ifdef VTK_USE_MPI
   return  comm;
-#else
-  return NULL;
-#endif
   }
+#endif
 
 //----------------------------------------------------------------------------
 int CMFEUtility::PAR_Size(void)

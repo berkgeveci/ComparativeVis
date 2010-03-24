@@ -58,7 +58,12 @@ class vtkCell;
 class vtkDataSet;
 class vtkPoints;
 class vtkRectilinearGrid;
-#include <vtkMPI.h>
+
+#ifdef VTK_USE_MPI
+  #include <vtkMPI.h>
+#endif
+  
+
 
 namespace CMFEUtility
 {
@@ -67,9 +72,11 @@ namespace CMFEUtility
   //world we are in, and the number of processors in that world
   void Setup();
 
+#ifdef VTK_USE_MPI
   // Description:
   //returns the mpi commuinicator we should be using
   MPI_Comm* GetMPIComm();
+#endif
 
   // Description:
   // Get the number of processors 
