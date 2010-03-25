@@ -70,7 +70,6 @@
 #include <vtkRectilinearGrid.h>
 #include <vtkShortArray.h>
 #include <vtkStructuredGrid.h>
-#include <vtkToolkits.h>
 
 #include <cstring>
   

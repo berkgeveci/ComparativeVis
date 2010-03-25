@@ -54,13 +54,16 @@
 #ifndef __vtkCMFEUtility_h
 #define __vtkCMFEUtility_h
 
+#include <vtkToolkits.h>
+
 class vtkCell;
 class vtkDataSet;
 class vtkPoints;
 class vtkRectilinearGrid;
 
+
 #ifdef VTK_USE_MPI
-  #include <vtkMPI.h>
+# include <vtkMPI.h>
 #endif
   
 
