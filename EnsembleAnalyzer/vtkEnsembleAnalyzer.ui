@@ -14,229 +14,198 @@
    <string>Ensemble Analyzer</string>
   </property>
   <widget class="QWidget" name="CentralWidget">
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>401</width>
-      <height>291</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="SearchTermsLayout"/>
-   </widget>
-   <widget class="QPushButton" name="QueryButton">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>300</y>
-      <width>191</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Perform query</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="AddSearchTermButton">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>300</y>
-      <width>191</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add another search term</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="ScriptSelector">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>500</y>
-      <width>181</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="RunScriptButton">
-    <property name="geometry">
-     <rect>
-      <x>110</x>
-      <y>530</y>
-      <width>191</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Run script</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ScriptParameters">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>500</y>
-      <width>181</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="ParametersLabel">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>480</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Input script parameters</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="ScriptLabel">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>480</y>
-      <width>80</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select script</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="ChangeInputButton">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>350</y>
-      <width>181</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Change input directory</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="ChangeOutputButton">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>430</y>
-      <width>181</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Change output directory</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="InputButtonLabel">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>360</y>
-      <width>210</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="OutputButtonLabel">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>440</y>
-      <width>210</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QTableWidget" name="Table">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>0</y>
-      <width>401</width>
-      <height>561</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="Line" name="line">
-    <property name="geometry">
-     <rect>
-      <x>-1</x>
-      <y>290</y>
-      <width>401</width>
-      <height>10</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="line_2">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>470</y>
-      <width>401</width>
-      <height>10</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="line_3">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>330</y>
-      <width>401</width>
-      <height>10</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="ChangeScriptButton">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>390</y>
-      <width>181</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Change script directory</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="ScriptButtonLabel">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>400</y>
-      <width>210</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="2">
+     <layout class="QGridLayout" name="SearchTermsLayout"/>
+    </item>
+    <item row="0" column="2" rowspan="11">
+     <widget class="QTableWidget" name="Table"/>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="AddSearchTermButton">
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Add another search term</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="QueryButton">
+      <property name="maximumSize">
+       <size>
+        <width>132</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Perform query</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="ChangeInputButton">
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Change input directory</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLabel" name="InputButtonLabel">
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QPushButton" name="ChangeScriptButton">
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Change script directory</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLabel" name="ScriptButtonLabel">
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QPushButton" name="ChangeOutputButton">
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Change output directory</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QLabel" name="OutputButtonLabel">
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QLabel" name="ParametersLabel">
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Input script parameters</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QLabel" name="ScriptLabel">
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Select script</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0">
+     <widget class="QLineEdit" name="ScriptParameters">
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>22</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="1">
+     <widget class="QComboBox" name="ScriptSelector">
+      <property name="maximumSize">
+       <size>
+        <width>151</width>
+        <height>26</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="0">
+     <widget class="QPushButton" name="RunScriptButton">
+      <property name="maximumSize">
+       <size>
+        <width>106</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Run script</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

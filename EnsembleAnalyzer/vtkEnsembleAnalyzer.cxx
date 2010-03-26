@@ -147,6 +147,8 @@ void vtkEnsembleAnalyzer::AddSearchTerm()
   compareCombo->insertItem(5, ">");
 
   QLineEdit *inputField = new QLineEdit();
+  inputField->setMinimumWidth(32);
+  inputField->setMinimumWidth(150);
   
   QPushButton *removeRowButton = new QPushButton("-");
   connect(removeRowButton, SIGNAL(pressed()), this->Mapper, SLOT(map()));
@@ -294,6 +296,9 @@ void vtkEnsembleAnalyzer::PerformQuery(std::string query)
       }
     }
   table->Delete();
+
+  //select all the rows in the results table
+  this->Table->selectAll();
 }
 
 //-----------------------------------------------------------------------------

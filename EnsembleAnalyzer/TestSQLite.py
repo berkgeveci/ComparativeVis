@@ -1,30 +1,33 @@
 from vtk import *
-from libvtkMetadataBrowserAPIPython import *
+from libvtkDatabaseConnectionPython import *
+from libvtkMetadataBrowserPython import *
 from vtk import *
 import sys
 
 if __name__ == "__main__":
-  if len(sys.argv) < 2:
-    print sys.argv[0] + " <experimentName";
+  if len(sys.argv) < 3:
+    print sys.argv[0] + " <path/to/db-file> <experimentName>";
     sys.exit(1)
-  api = vtkMetadataBrowserAPI();
-  api.UseSQLite();
-  api.SetFileName("weather.db");
 
+  db = vtkDatabaseConnection();
+  db.UseSQLite();
+  db.SetFileName(sys.argv[1]);
+  
   #test connection
-  if(api.ConnectToDatabase()):
+  if(db.ConnectToDatabase()):
     print "Connection successful!"
   else:
     print "Connection failed!"
     sys.exit(1)
 
   #test bad query
-  api.ExecuteQuery("SELECT bogons FROM faketable;");
+  db.ExecuteQuery("SELECT bogons FROM faketable;");
+
+  browser = vtkMetadataBrowser();
+  browser.SetDatabaseConnection(db);
 
   #test GetListOfExperiments()
-  experiments = api.GetListOfExperiments()
-  print str(type(experiments))
-  print dir(experiments)
+  experiments = browser.GetListOfExperiments()
   print "There are %d experiments:" % experiments.GetNumberOfValues()
 
   for i in range(0, experiments.GetNumberOfValues()):
@@ -32,15 +35,18 @@ if __name__ == "__main__":
   experiments.Delete();
 
   #test GetExperiment
-  experiment = api.GetExperiment(sys.argv[1]);
+  experimentName = sys.argv[2]
+  query = "SELECT * FROM " + experimentName
+
+  experiment = browser.GetDataFromExperiment(experimentName, query)
   print "Experiment table '%s' has %d rows and %d columns." \
-    % (sys.argv[1], experiment.GetNumberOfRows(), experiment.GetNumberOfColumns())
-  experiment.Delete();
+    % (experimentName, experiment.GetNumberOfRows(), experiment.GetNumberOfColumns())
+  experiment.Delete()
 
   #test GetAnalyses
-  analyses = api.GetAnalyses(sys.argv[1]);
+  analyses = browser.GetAnalyses(experimentName);
   print "Analysis table has %d rows and %d columns for experiment %s" \
-    % (analyses.GetNumberOfRows(), analyses.GetNumberOfColumns(), sys.argv[1])
+    % (analyses.GetNumberOfRows(), analyses.GetNumberOfColumns(), experimentName)
   analyses.Delete();
-  api.Delete();
+  browser.Delete();
 
