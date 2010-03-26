@@ -1,3 +1,8 @@
+cmake_minimum_required(VERSION 2.8)
+
+FIND_PACKAGE(ParaView REQUIRED)
+INCLUDE(${PARAVIEW_USE_FILE})
+
 IF (QT_USE_FILE)
   INCLUDE(${QT_USE_FILE})
 ENDIF (QT_USE_FILE)
@@ -23,10 +28,16 @@ ADD_PARAVIEW_PLUGIN(SQLToolbar "1.0"
   SERVER_MANAGER_SOURCES
     vtkSQLiteTableReader.h vtkSQLiteTableReader.cxx
     vtkMySQLTableReader.h vtkMySQLTableReader.cxx
+    vtkPostgreSQLTableReader.h vtkPostgreSQLTableReader.cxx
   SOURCES ${MOC_SRCS} ${IFACE_SRCS} 
   SQLToolbarActions.cxx)
+TARGET_LINK_LIBRARIES(SQLToolbar VTKIO)
 
-ADD_EXECUTABLE(tableReader main.cxx
+ADD_EXECUTABLE(testMySQL testMySQL.cxx
   vtkSQLTableReader.h vtkSQLTableReader.cxx
   vtkMySQLTableReader.h vtkMySQLTableReader.cxx)
-TARGET_LINK_LIBRARIES(tableReader vtkCommon vtkFiltering vtkIO)
+TARGET_LINK_LIBRARIES(testMySQL vtkCommon vtkFiltering vtkIO)
+ADD_EXECUTABLE(testPostgreSQL testPostgreSQL.cxx
+  vtkSQLTableReader.h vtkSQLTableReader.cxx
+  vtkPostgreSQLTableReader.h vtkPostgreSQLTableReader.cxx)
+TARGET_LINK_LIBRARIES(testPostgreSQL vtkCommon vtkFiltering vtkIO)

@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QStyle>
 
 #include "vtkMySQLDatabase.h"
+#include "vtkPostgreSQLDatabase.h"
 #include "vtkSMPropertyHelper.h"
 #include "vtkSMProxy.h"
 #include "vtkSQLiteDatabase.h"
@@ -117,19 +118,13 @@ void SQLToolbarActions::CreateDialogUi()
     QApplication::translate("DatabaseDialog", "Open local SQLite database", 0,
                             QApplication::UnicodeUTF8));
 
-  this->MySQLRadioButton = new QRadioButton(this->DatabaseDialog);
-  this->MySQLRadioButton->setObjectName(QString::fromUtf8("MySQLRadioButton"));
-  this->MySQLRadioButton->setGeometry(QRect(20, 90, 180, 21));
-  this->MySQLRadioButton->setText(
-    QApplication::translate("DatabaseDialog", "MySQL database", 0,
-                            QApplication::UnicodeUTF8));
-  this->PostgresRadioButton = new QRadioButton(this->DatabaseDialog);
-  this->PostgresRadioButton->setObjectName(
-    QString::fromUtf8("PostgresRadioButton"));
-  this->PostgresRadioButton->setGeometry(QRect(200, 90, 180, 21));
-  this->PostgresRadioButton->setText(
-    QApplication::translate("DatabaseDialog", "Postgres database", 0,
-                            QApplication::UnicodeUTF8));
+
+  this->DatabaseType = new QComboBox(this->DatabaseDialog);
+  this->DatabaseType->setObjectName(QString::fromUtf8("DatabaseType"));
+  this->DatabaseType->setGeometry(QRect(20, 90, 180, 21));
+  this->DatabaseType->insertItem(0, QString("MySQL"));
+  this->DatabaseType->insertItem(1, QString("PostgreSQL"));
+  this->DatabaseType->insertItem(2, QString("SQLite"));
 
   this->HostInput = new QLineEdit(this->DatabaseDialog);
   this->HostInput->setObjectName(QString::fromUtf8("HostInput"));
@@ -219,11 +214,16 @@ void SQLToolbarActions::SetupSignalsAndSlots()
                 this, SLOT(ConnectToDatabase()));
   this->connect(this->LoadTableButton, SIGNAL(pressed()),
                 this, SLOT(LoadTable()));
+  this->connect(this->DatabaseType, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(CheckConnectionParameters()));
+
 }
 
 //-----------------------------------------------------------------------------
 void SQLToolbarActions::SelectSQLiteDatabaseFile()
 {
+  this->DatabaseType->setCurrentIndex(2);
+
   //ask the user to select a database file
   this->SQLiteDatabaseFile = QFileDialog::getOpenFileName(this->DatabaseDialog,
     tr("Select SQLite Database"), "", tr("SQLite Database Files (*.*)"));
@@ -248,7 +248,7 @@ void SQLToolbarActions::SelectSQLiteDatabaseFile()
       {
       this->LoadTableButton->setEnabled(true);
       }
-    tableNames->Delete();
+    //tableNames->Delete();
     }
   sqliteDB->Close();
   sqliteDB->Delete();
@@ -262,8 +262,8 @@ void SQLToolbarActions::CheckConnectionParameters()
 {
   if(this->HostInput->text() != "" && this->DBNameInput->text() != "" &&
      this->UserInput->text() != "" && this->PasswordInput->text() != "" &&
-       (this->MySQLRadioButton->isChecked() ||
-        this->PostgresRadioButton->isChecked()))
+       (this->DatabaseType->currentText() == "MySQL" ||
+        this->DatabaseType->currentText() == "PostgreSQL"))
     {
     this->ConnectButton->setEnabled(true);
     }
@@ -276,11 +276,11 @@ void SQLToolbarActions::CheckConnectionParameters()
 //-----------------------------------------------------------------------------
 void SQLToolbarActions::ConnectToDatabase()
 {
-  if(this->MySQLRadioButton->isChecked())
+  if(this->DatabaseType->currentText() == "MySQL")
     {
     this->ConnectToMySQLDatabase();
     }
-  else if(this->PostgresRadioButton->isChecked())
+  else if(this->DatabaseType->currentText() == "PostgreSQL")
     {
     this->ConnectToPostgresDatabase();
     }
@@ -324,6 +324,36 @@ void SQLToolbarActions::ConnectToMySQLDatabase()
 //-----------------------------------------------------------------------------
 void SQLToolbarActions::ConnectToPostgresDatabase()
 {
+  vtkSmartPointer<vtkPostgreSQLDatabase> postgreSQLDB =
+    vtkSmartPointer<vtkPostgreSQLDatabase>::New();
+  postgreSQLDB->SetHostName(this->HostInput->text().toStdString().c_str());
+  postgreSQLDB->SetDatabaseName(this->DBNameInput->text().toStdString().c_str());
+  postgreSQLDB->SetUser(this->UserInput->text().toStdString().c_str());
+  if(postgreSQLDB->Open(this->PasswordInput->text().toStdString().c_str()))
+    {
+    //if we can open it succesfully, populate the list of table names
+    vtkStringArray *tableNames = postgreSQLDB->GetTables();
+    for(int i = 0; i < tableNames->GetNumberOfValues(); i++)
+      {
+      this->TableComboBox->insertItem(i, QString(tableNames->GetValue(i))); 
+      }
+    if(tableNames->GetNumberOfValues() > 0)
+      {
+      this->LoadTableButton->setEnabled(true);
+      }
+    postgreSQLDB->Close();
+    tableNames->Delete();
+    this->UsingMySQL = false;
+    this->UsingPostgreSQL = true;
+    this->UsingSQLite = false;
+    }
+  else
+    {
+    QMessageBox msgBox;
+    msgBox.setText(
+      "Unable to connect to the database.  Please check your settings and try again.");
+    msgBox.exec();
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -335,6 +365,10 @@ void SQLToolbarActions::LoadTable()
   if(this->UsingMySQL)
     {
     this->LoadMySQLTable(tableName);
+    }
+  if(this->UsingPostgreSQL)
+    {
+    this->LoadPostgreSQLTable(tableName);
     }
   if(this->UsingSQLite)
     {
@@ -358,6 +392,60 @@ void SQLToolbarActions::LoadMySQLTable(QString tableName)
   // create the new source
   pqPipelineSource *source =
     builder->createSource("sources", "MySQL Table", s);
+  
+  //set its properties based on the values the user submitted
+  vtkSMPropertyHelper(source->getProxy(), "HostName").Set(
+    this->HostInput->text().toStdString().c_str());
+  vtkSMPropertyHelper(source->getProxy(), "DatabaseName").Set(
+    this->DBNameInput->text().toStdString().c_str());
+  vtkSMPropertyHelper(source->getProxy(), "TableName").Set(
+    tableName.toStdString().c_str());
+  vtkSMPropertyHelper(source->getProxy(), "User").Set(
+    this->UserInput->text().toStdString().c_str());
+  vtkSMPropertyHelper(source->getProxy(), "Password").Set(
+    this->PasswordInput->text().toStdString().c_str());
+
+  source->getProxy()->UpdateVTKObjects();
+    source->updatePipeline();
+
+  pqDisplayPolicy* displayPolicy =
+    pqApplicationCore::instance()->getDisplayPolicy();
+  if (!displayPolicy)
+    {
+    qCritical() << "No display policy defined. Cannot create pending displays.";
+    return;
+    }
+
+  //display the new table
+  pqView *activeview = pqActiveObjects::instance().activeView();
+  pqDataRepresentation* repr = displayPolicy->createPreferredRepresentation(
+    source->getOutputPort(0), activeview, false);
+  if (repr && repr->getView())
+    {
+    pqView* view = repr->getView();
+    view->render();
+    }
+  
+  END_UNDO_SET();
+  this->DatabaseDialog->hide();
+}
+
+//-----------------------------------------------------------------------------
+void SQLToolbarActions::LoadPostgreSQLTable(QString tableName)
+{
+  pqApplicationCore* core = pqApplicationCore::instance();
+  pqServerManagerModel* sm = core->getServerManagerModel();
+  pqObjectBuilder* builder = core->getObjectBuilder();
+
+  // just create it on the first server connection
+  pqServer* s = sm->getItemAtIndex<pqServer*>(0);
+
+  // make this operation undo-able 
+  BEGIN_UNDO_SET("Load vtkTable from PostgreSQL");
+
+  // create the new source
+  pqPipelineSource *source =
+    builder->createSource("sources", "PostgreSQL Table", s);
   
   //set its properties based on the values the user submitted
   vtkSMPropertyHelper(source->getProxy(), "HostName").Set(

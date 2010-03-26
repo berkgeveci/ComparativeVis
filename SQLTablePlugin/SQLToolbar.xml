@@ -23,6 +23,20 @@
         <View type="SpreadSheetView" />
       </Hints>
     </SourceProxy>
+    <SourceProxy name="PostgreSQL Table" class="vtkPostgreSQLTableReader">
+      <StringVectorProperty name="HostName" command="SetHostName" number_of_elements="1" label="Host"/> 
+      <StringVectorProperty name="DatabaseName" command="SetDatabaseName" number_of_elements="1" label="Database"/> 
+      <StringVectorProperty name="TableName" command="SetTableName" number_of_elements="1" label="Table"/> 
+      <StringVectorProperty name="User" command="SetUser" number_of_elements="1" label="User"/> 
+      <StringVectorProperty name="Password" command="SetPassword" number_of_elements="1" label="Password"/> 
+      <Hints>
+        <Property name="HostName" show="0"/>
+        <Property name="DatabaseName" show="0"/>
+        <Property name="User" show="0"/>
+        <Property name="Password" show="0"/>
+        <View type="SpreadSheetView" />
+      </Hints>
+    </SourceProxy>
   </ProxyGroup>
 </ServerManagerConfiguration>
 

@@ -75,6 +75,9 @@ public slots:
   /// Load the selected MySQL table into ParaView
   void LoadMySQLTable(QString tableName);
   
+  /// Load the selected PostgreSQL table into ParaView
+  void LoadPostgreSQLTable(QString tableName);
+
   /// Load the selected SQLitetable into ParaView
   void LoadSQLiteTable(QString tableName);
 
@@ -85,8 +88,7 @@ protected:
   bool UsingPostgreSQL;
   //GUI elements
   QWidget *DatabaseDialog;
-  QRadioButton *MySQLRadioButton;
-  QRadioButton *PostgresRadioButton;
+  QComboBox *DatabaseType;
   QPushButton *OpenSQLiteDatabaseButton;
   QLineEdit *HostInput;
   QLabel *HostLabel;

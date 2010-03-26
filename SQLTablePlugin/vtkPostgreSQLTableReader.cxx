@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   ParaView
-  Module:    $RCSfile: vtkSQLiteTableReader.cxx,v $
+  Module:    $RCSfile: vtkPostgreSQLTableReader.cxx,v $
 
   Copyright (c) Kitware, Inc.
   All rights reserved.
@@ -15,22 +15,22 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkSQLiteDatabase.h"
-#include "vtkSQLiteQuery.h"
+#include "vtkPostgreSQLDatabase.h"
+#include "vtkPostgreSQLQuery.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
 #include "vtkVariant.h"
 #include "vtkVariantArray.h"
 
-#include "vtkSQLiteTableReader.h"
+#include "vtkPostgreSQLTableReader.h"
 
 //----------------------------------------------------------------------------
-vtkCxxRevisionMacro(vtkSQLiteTableReader, "$Revision: 1.1 $");
-vtkStandardNewMacro(vtkSQLiteTableReader);
+vtkCxxRevisionMacro(vtkPostgreSQLTableReader, "$Revision: 1.1 $");
+vtkStandardNewMacro(vtkPostgreSQLTableReader);
 
 //----------------------------------------------------------------------------
-vtkSQLiteTableReader::vtkSQLiteTableReader()
+vtkPostgreSQLTableReader::vtkPostgreSQLTableReader()
 {
   vtkTable *output = vtkTable::New();
   this->SetOutput(output);
@@ -39,12 +39,15 @@ vtkSQLiteTableReader::vtkSQLiteTableReader()
   output->ReleaseData();
   output->Delete();
 
-  this->DatabaseFileName = "";
-  this->Database = vtkSQLiteDatabase::New();
+  this->HostName = "";
+  this->DatabaseName = "";
+  this->User = "";
+  this->Password = "";
+  this->Database = vtkPostgreSQLDatabase::New();
 }
 
 //----------------------------------------------------------------------------
-vtkSQLiteTableReader::~vtkSQLiteTableReader()
+vtkPostgreSQLTableReader::~vtkPostgreSQLTableReader()
 {
   if(this->Database->IsOpen())
     {
@@ -56,59 +59,81 @@ vtkSQLiteTableReader::~vtkSQLiteTableReader()
 }
 
 //----------------------------------------------------------------------------
-void vtkSQLiteTableReader::SetInput(vtkSQLiteDatabase *db)
+void vtkPostgreSQLTableReader::SetInput(vtkPostgreSQLDatabase *db)
 {
   this->Database = db;
 }
 
 //----------------------------------------------------------------------------
-void vtkSQLiteTableReader::SetFileName(const char *filename)
+void vtkPostgreSQLTableReader::SetHostName(const char *hostname)
 {
-  this->DatabaseFileName = filename;
-  this->OpenDatabaseConnection();
-  if(this->TableName != "")
+  this->HostName = hostname;
+  this->TryToConnectToDatabase();
+}
+
+//----------------------------------------------------------------------------
+void vtkPostgreSQLTableReader::SetDatabaseName(const char *databasename)
+{
+  this->DatabaseName = databasename;
+  this->TryToConnectToDatabase();
+}
+
+//----------------------------------------------------------------------------
+void vtkPostgreSQLTableReader::SetUser(const char *user)
+{
+  this->User = user;
+  this->TryToConnectToDatabase();
+}
+
+//----------------------------------------------------------------------------
+void vtkPostgreSQLTableReader::SetPassword(const char *password)
+{
+  this->Password = password;
+  this->TryToConnectToDatabase();
+}
+
+//----------------------------------------------------------------------------
+void vtkPostgreSQLTableReader::TryToConnectToDatabase()
+{
+  if(this->HostName != "" && this->DatabaseName != "" &&
+     this->User != "" && this->Password != "")
     {
-    this->CheckIfTableExists();
+    this->OpenDatabaseConnection();
     }
 }
 
 //----------------------------------------------------------------------------
-bool vtkSQLiteTableReader::OpenDatabaseConnection()
+void vtkPostgreSQLTableReader::OpenDatabaseConnection()
 {
-  if(this->DatabaseFileName == "")
-    {
-    vtkErrorMacro(<<"No filename specified!");
-    return false;
-    }
-  this->Database->SetDatabaseFileName(this->DatabaseFileName.c_str());
+  this->Database->SetHostName(this->HostName.c_str());
+  this->Database->SetUser(this->User.c_str());
+  this->Database->SetPassword(this->Password.c_str());
+  this->Database->SetDatabaseName(this->DatabaseName.c_str());
 
   if(this->Database->IsOpen())
     {
     this->Database->Close();
     }
-
-  if(!this->Database->Open(""))
+  if(!this->Database->Open(this->Password.c_str()))
     {
     vtkErrorMacro(<<"Error opening database!");
-    return false;
     }
-  return true;
 }
 
 //----------------------------------------------------------------------------
-void vtkSQLiteTableReader::CloseDatabaseConnection()
+void vtkPostgreSQLTableReader::CloseDatabaseConnection()
 {
   this->Database->Close();
 }
 
 //----------------------------------------------------------------------------
-vtkStringArray* vtkSQLiteTableReader::GetTables()
+vtkStringArray* vtkPostgreSQLTableReader::GetTables()
 {
   return this->Database->GetTables();
 }
 
 //----------------------------------------------------------------------------
-bool vtkSQLiteTableReader::SetTableName(const char *name)
+bool vtkPostgreSQLTableReader::SetTableName(const char *name)
 {
   vtkstd::string nameStr = name;
   this->TableName = nameStr; 
@@ -128,7 +153,7 @@ bool vtkSQLiteTableReader::SetTableName(const char *name)
 }
 
 //----------------------------------------------------------------------------
-bool vtkSQLiteTableReader::CheckIfTableExists()
+bool vtkPostgreSQLTableReader::CheckIfTableExists()
 {
   if(!this->Database->IsOpen())
     {
@@ -148,16 +173,16 @@ bool vtkSQLiteTableReader::CheckIfTableExists()
     vtkErrorMacro(<<"Table " << this->TableName
                   << " does not exist in the database!");
     this->TableName = "";
-    //tableNames->Delete();
+    tableNames->Delete();
     return false;
     }
 
-  //tableNames->Delete();
+  tableNames->Delete();
   return true;
 }
 
 //----------------------------------------------------------------------------
-int vtkSQLiteTableReader::RequestData(vtkInformation *,
+int vtkPostgreSQLTableReader::RequestData(vtkInformation *,
                                       vtkInformationVector **,
                                       vtkInformationVector *outputVector)
 {
@@ -197,11 +222,11 @@ int vtkSQLiteTableReader::RequestData(vtkInformation *,
     }
   columnNames->Delete();
 
-  //do a query to get the contents of the SQLite table
+  //do a query to get the contents of the PostgreSQL table
   vtkstd::string queryStr = "SELECT * FROM ";
   queryStr += this->TableName;
-  vtkSQLiteQuery *query =
-    static_cast<vtkSQLiteQuery*>(this->Database->GetQueryInstance());
+  vtkPostgreSQLQuery *query =
+    static_cast<vtkPostgreSQLQuery*>(this->Database->GetQueryInstance());
   query->SetQuery(queryStr.c_str());
   if(!query->Execute())
     {
@@ -228,7 +253,7 @@ int vtkSQLiteTableReader::RequestData(vtkInformation *,
 }
 
 //----------------------------------------------------------------------------
-void vtkSQLiteTableReader::PrintSelf(ostream& os, vtkIndent indent)
+void vtkPostgreSQLTableReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
