@@ -3,11 +3,14 @@
 #include "vtkMySQLDatabase.h"
 #include "vtkObjectFactory.h"
 #include "vtkPostgreSQLDatabase.h"
+#include "vtkRowQueryToTable.h"
 #include "vtkSQLiteDatabase.h"
 #include "vtkSQLQuery.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
 #include "vtkVariantArray.h"
+
+#include "vtkSmartPointer.h"
 
 #include "vtkDatabaseConnection.h"
 #include "vtkMetadataBrowser.h"
@@ -15,6 +18,7 @@
 vtkStandardNewMacro(vtkMetadataBrowser);
 vtkCxxRevisionMacro(vtkMetadataBrowser, "$Revision: 1.1 $");
 
+vtkCxxSetObjectMacro(vtkMetadataBrowser, DatabaseConnection, vtkDatabaseConnection);
 
 //-----------------------------------------------------------------------------
 vtkMetadataBrowser::vtkMetadataBrowser()
@@ -29,12 +33,6 @@ vtkMetadataBrowser::~vtkMetadataBrowser()
     {
     this->DatabaseConnection->Delete();
     }
-}
-
-//-----------------------------------------------------------------------------
-void vtkMetadataBrowser::SetDatabaseConnection(vtkDatabaseConnection *dbc)
-{
-  this->DatabaseConnection = dbc;
 }
 
 //-----------------------------------------------------------------------------
@@ -187,34 +185,34 @@ vtkTable* vtkMetadataBrowser::GetDataFromExperiment(std::string experimentName,
     return experiment;
     }
 
- //create a vector of columns from the experiment table
-  vtkstd::vector<vtkVariantArray *> columns;
-  vtkStringArray *columnNames;
-  if(this->DatabaseConnection->IsUsingMySQL())
-    {
-    columnNames =
-      this->DatabaseConnection->GetMySQLDatabase()->
-        GetRecord(experimentName.c_str());
-    }
-  else if(this->DatabaseConnection->IsUsingSQLite())
-    {
-    columnNames =
-      this->DatabaseConnection->GetSQLiteDatabase()->
-        GetRecord(experimentName.c_str());
-    }
-  else
-    { //postgres
-    columnNames =
-      this->DatabaseConnection->GetPostgreSQLDatabase()->
-        GetRecord(experimentName.c_str());
-    }
-  for(int col = 0; col < columnNames->GetNumberOfValues(); col++)
-    {
-    //set the columns' names based on the database
-    columns.push_back(vtkVariantArray::New());
-    (columns[col])->SetName(columnNames->GetValue(col));
-    }
-  columnNames->Delete();
+ // //create a vector of columns from the experiment table
+ //  vtkstd::vector<vtkVariantArray *> columns;
+ //  vtkStringArray *columnNames;
+ //  if(this->DatabaseConnection->IsUsingMySQL())
+ //    {
+ //    columnNames =
+ //      this->DatabaseConnection->GetMySQLDatabase()->
+ //        GetRecord(experimentName.c_str());
+ //    }
+ //  else if(this->DatabaseConnection->IsUsingSQLite())
+ //    {
+ //    columnNames =
+ //      this->DatabaseConnection->GetSQLiteDatabase()->
+ //        GetRecord(experimentName.c_str());
+ //    }
+ //  else
+ //    { //postgres
+ //    columnNames =
+ //      this->DatabaseConnection->GetPostgreSQLDatabase()->
+ //        GetRecord(experimentName.c_str());
+ //    }
+ //  for(int col = 0; col < columnNames->GetNumberOfValues(); col++)
+ //    {
+ //    //set the columns' names based on the database
+ //    columns.push_back(vtkVariantArray::New());
+ //    (columns[col])->SetName(columnNames->GetValue(col));
+ //    }
+ //  columnNames->Delete();
 
   //select from the experiment table
   bool ok = this->DatabaseConnection->ExecuteQuery(query.c_str());
@@ -225,20 +223,25 @@ vtkTable* vtkMetadataBrowser::GetDataFromExperiment(std::string experimentName,
  
   //construct a table from the returned rows
   vtkSQLQuery *sqlQuery = this->DatabaseConnection->GetSQLQuery();
-  while(sqlQuery->NextRow())
-    {
-    for(int col = 0; col < sqlQuery->GetNumberOfFields(); ++ col)
-      {
-      columns[col]->InsertNextValue(sqlQuery->DataValue(col));
-      }
-    }
-
-  //combine the columns into a vtkTable and cleanup
-  for(unsigned int col = 0; col < columns.size(); col++)
-    {
-    experiment->AddColumn(columns[col]);
-    (columns[col])->Delete();
-    }
+  vtkSmartPointer<vtkRowQueryToTable> rqtt = 
+    vtkSmartPointer<vtkRowQueryToTable>::New();
+  rqtt->SetQuery(sqlQuery);
+  rqtt->Update();
+  experiment->ShallowCopy(rqtt->GetOutput());
+  // while(sqlQuery->NextRow())
+  //   {
+  //   for(int col = 0; col < sqlQuery->GetNumberOfFields(); ++ col)
+  //     {
+  //     columns[col]->InsertNextValue(sqlQuery->DataValue(col));
+  //     }
+  //   }
+  // 
+  // //combine the columns into a vtkTable and cleanup
+  // for(unsigned int col = 0; col < columns.size(); col++)
+  //   {
+  //   experiment->AddColumn(columns[col]);
+  //   (columns[col])->Delete();
+  //   }
   return experiment;
 }
 
