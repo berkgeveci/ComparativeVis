@@ -31,7 +31,7 @@ ADD_PARAVIEW_PLUGIN(SQLToolbar "1.0"
     vtkPostgreSQLTableReader.h vtkPostgreSQLTableReader.cxx
   SOURCES ${MOC_SRCS} ${IFACE_SRCS} 
   SQLToolbarActions.cxx)
-TARGET_LINK_LIBRARIES(SQLToolbar VTKIO)
+TARGET_LINK_LIBRARIES(SQLToolbar vtkIO)
 
 ADD_EXECUTABLE(testMySQL testMySQL.cxx
   vtkSQLTableReader.h vtkSQLTableReader.cxx
