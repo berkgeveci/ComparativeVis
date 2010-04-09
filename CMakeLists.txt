@@ -4,4 +4,5 @@ project(ComparativeVis)
 
 add_subdirectory(MultiFileReader)
 add_subdirectory(CMFEFilter)
+add_subdirectory(SQLTablePlugin)
 
