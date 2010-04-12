@@ -14,7 +14,6 @@ INCLUDE(${VTK_USE_FILE})
 OPTION(BUILD_SHARED_LIBS "Build with shared libraries."
        ${VTK_BUILD_SHARED_LIBS})
 
-
 ADD_LIBRARY( vtkDatabaseConnection
              vtkDatabaseConnection.h vtkDatabaseConnection.cxx )
 TARGET_LINK_LIBRARIES( vtkDatabaseConnection vtkIO )
@@ -82,10 +81,11 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}")
 VTK_WRAP_PYTHON3(vtkDatabaseConnectionPython Database_Python_Sources 
                  vtkDatabaseConnection.h vtkDatabaseConnection.cxx )
 ADD_LIBRARY(vtkDatabaseConnectionPythonD ${Database_Python_Sources})
-TARGET_LINK_LIBRARIES(vtkDatabaseConnectionPythonD ${PYTHON_LIBRARY} vtkDatabaseConnection)
+TARGET_LINK_LIBRARIES(vtkDatabaseConnectionPythonD
+  ${PYTHON_LIBRARY} vtkDatabaseConnection vtkCommonPythonD)
 PYTHON_ADD_MODULE(vtkDatabaseConnectionPython vtkDatabaseConnectionPythonInit.cxx)
 IF(PYTHON_ENABLE_MODULE_vtkDatabaseConnectionPython)
-  TARGET_LINK_LIBRARIES(vtkDatabaseConnectionPython vtkDatabaseConnectionPythonD vtkCommonPythonD)
+  TARGET_LINK_LIBRARIES(vtkDatabaseConnectionPython vtkDatabaseConnectionPythonD)
 
   # Python extension modules on Windows must have the extension ".pyd"
   # instead of ".dll" as of Python 2.5.  Older python versions do support
@@ -120,10 +120,11 @@ ENDIF(PYTHON_ENABLE_MODULE_vtkDatabaseConnectionPython)
 VTK_WRAP_PYTHON3(vtkMetadataBrowserPython API_Python_Sources 
                  vtkMetadataBrowser.h vtkMetadataBrowser.cxx )
 ADD_LIBRARY(vtkMetadataBrowserPythonD ${API_Python_Sources})
-TARGET_LINK_LIBRARIES(vtkMetadataBrowserPythonD ${PYTHON_LIBRARY} vtkMetadataBrowser)
+TARGET_LINK_LIBRARIES(vtkMetadataBrowserPythonD
+  ${PYTHON_LIBRARY} vtkMetadataBrowser vtkCommonPythonD)
 PYTHON_ADD_MODULE(vtkMetadataBrowserPython vtkMetadataBrowserPythonInit.cxx)
 IF(PYTHON_ENABLE_MODULE_vtkMetadataBrowserPython)
-  TARGET_LINK_LIBRARIES(vtkMetadataBrowserPython vtkMetadataBrowserPythonD vtkCommonPythonD)
+  TARGET_LINK_LIBRARIES(vtkMetadataBrowserPython vtkMetadataBrowserPythonD)
 
   # Python extension modules on Windows must have the extension ".pyd"
   # instead of ".dll" as of Python 2.5.  Older python versions do support
