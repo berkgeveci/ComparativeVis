@@ -9,6 +9,12 @@ PROJECT(EnsembleAnalyzer)
 FIND_PACKAGE(VTK REQUIRED)
 INCLUDE(${VTK_USE_FILE})
 
+# Give user option of building shared or static libraries.  Default to
+# the choice made for VTK.
+OPTION(BUILD_SHARED_LIBS "Build with shared libraries."
+       ${VTK_BUILD_SHARED_LIBS})
+
+
 ADD_LIBRARY( vtkDatabaseConnection
              vtkDatabaseConnection.h vtkDatabaseConnection.cxx )
 TARGET_LINK_LIBRARIES( vtkDatabaseConnection vtkIO )
