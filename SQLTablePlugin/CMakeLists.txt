@@ -31,13 +31,13 @@ ADD_PARAVIEW_PLUGIN(SQLToolbar "1.0"
     vtkPostgreSQLTableReader.h vtkPostgreSQLTableReader.cxx
   SOURCES ${MOC_SRCS} ${IFACE_SRCS} 
   SQLToolbarActions.cxx)
-TARGET_LINK_LIBRARIES(SQLToolbar vtkIO)
+TARGET_LINK_LIBRARIES(SQLToolbar vtkIO ${QT_LIBRARIES})
 
 ADD_EXECUTABLE(testMySQL testMySQL.cxx
   vtkSQLTableReader.h vtkSQLTableReader.cxx
   vtkMySQLTableReader.h vtkMySQLTableReader.cxx)
-TARGET_LINK_LIBRARIES(testMySQL vtkCommon vtkFiltering vtkIO)
+TARGET_LINK_LIBRARIES(testMySQL vtkCommon vtkFiltering vtkIO ${QT_LIBRARIES})
 ADD_EXECUTABLE(testPostgreSQL testPostgreSQL.cxx
   vtkSQLTableReader.h vtkSQLTableReader.cxx
   vtkPostgreSQLTableReader.h vtkPostgreSQLTableReader.cxx)
-TARGET_LINK_LIBRARIES(testPostgreSQL vtkCommon vtkFiltering vtkIO)
+TARGET_LINK_LIBRARIES(testPostgreSQL vtkCommon vtkFiltering vtkIO ${QT_LIBRARIES})
