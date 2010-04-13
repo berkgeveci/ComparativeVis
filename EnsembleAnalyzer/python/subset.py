@@ -20,15 +20,16 @@ print "Extracting subset of %s from (0, 0, 0) to (%s, %s, %s)" \
   % (inputName, x, y, z)
 sys.stdout.flush()
 
-reader = XMLImageDataReader(FileName=[inputName])
+#reader = XMLImageDataReader(FileName=[inputName])
+reader = XMLRectilinearGridReader(FileName=[inputName])
 
 extract = ExtractSubset()
 extract.VOI = [0, int(x), 0, int(y), 0, int(z)]
 
 print "Writing results to %s" % outputName
 sys.stdout.flush()
-writer = XMLImageDataWriter(FileName=outputName, Input=extract)
-#writer = DataSetWriter(FileName=outputName, Input=extract)
+#writer = XMLImageDataWriter(FileName=outputName, Input=extract)
+writer = XMLRectilinearGridWriter(FileName=outputName, Input=extract)
 writer.UpdatePipeline()
 print "subset complete"
 sys.stdout.flush()
