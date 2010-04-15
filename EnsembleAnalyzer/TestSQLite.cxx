@@ -50,8 +50,12 @@ int main(int argc, char **argv)
 
   //test GetExperiment
   std::string experimentName = argv[1];
+  std::string query = "SELECT *";
+  //query += experimentName;
+  /*
   std::string query = "SELECT * FROM ";
   query += experimentName;
+  */
 
   vtkTable *experiment = browser->GetDataFromExperiment(experimentName, query);
   cout << "Experiment table '" << experimentName << "' has "
@@ -67,6 +71,7 @@ int main(int argc, char **argv)
   analyses->Delete();
 
   browser->Delete();
+  connection->Delete();
   return 0;
 }
 

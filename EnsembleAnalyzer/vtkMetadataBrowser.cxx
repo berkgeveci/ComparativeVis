@@ -185,34 +185,13 @@ vtkTable* vtkMetadataBrowser::GetDataFromExperiment(std::string experimentName,
     return experiment;
     }
 
- // //create a vector of columns from the experiment table
- //  vtkstd::vector<vtkVariantArray *> columns;
- //  vtkStringArray *columnNames;
- //  if(this->DatabaseConnection->IsUsingMySQL())
- //    {
- //    columnNames =
- //      this->DatabaseConnection->GetMySQLDatabase()->
- //        GetRecord(experimentName.c_str());
- //    }
- //  else if(this->DatabaseConnection->IsUsingSQLite())
- //    {
- //    columnNames =
- //      this->DatabaseConnection->GetSQLiteDatabase()->
- //        GetRecord(experimentName.c_str());
- //    }
- //  else
- //    { //postgres
- //    columnNames =
- //      this->DatabaseConnection->GetPostgreSQLDatabase()->
- //        GetRecord(experimentName.c_str());
- //    }
- //  for(int col = 0; col < columnNames->GetNumberOfValues(); col++)
- //    {
- //    //set the columns' names based on the database
- //    columns.push_back(vtkVariantArray::New());
- //    (columns[col])->SetName(columnNames->GetValue(col));
- //    }
- //  columnNames->Delete();
+  //don't require supplied queries to contain "FROM <experimentName>"
+  //since that information is supplied separately
+  if(query.find("from") == std::string::npos &&
+     query.find("FROM") == std::string::npos)
+    {
+    query = query + " FROM " + experimentName;
+    }
 
   //select from the experiment table
   bool ok = this->DatabaseConnection->ExecuteQuery(query.c_str());
