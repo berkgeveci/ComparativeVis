@@ -17,6 +17,8 @@
 
 #include <QActionGroup>
 
+#include "ui_pqCVColumnChooser.h"
+
 // Adds actions for co-processing.
 class pqCVActionsGroup : public QActionGroup
 {
@@ -28,7 +30,11 @@ public:
 
 protected slots:
   void tableToDataCollection();
+  void openPathDialog();
 
+protected:
+  Ui::pqCVColumnChooser UserInterface;
+  
 private:
   Q_DISABLE_COPY(pqCVActionsGroup)
 };

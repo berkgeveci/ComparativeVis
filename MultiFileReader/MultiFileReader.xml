@@ -17,6 +17,15 @@
         </Documentation>
       </StringVectorProperty>
 
+     <StringVectorProperty 
+         name="DirectoryPath" 
+         command="SetDirectoryPath"
+         number_of_elements="1"
+         default_values="b" >
+        <Documentation>
+        </Documentation>
+      </StringVectorProperty>
+
       <StringVectorProperty 
          name="FileNameColumn" 
          command="SetFileNameColumn"

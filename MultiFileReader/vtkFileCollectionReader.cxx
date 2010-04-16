@@ -16,6 +16,7 @@
 
 #include "vtkDataObject.h"
 #include "vtkGenericDataObjectReader.h"
+#include "vtkXMLGenericDataObjectReader.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -25,15 +26,21 @@
 #include "vtkStdString.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
+#include <vtksys/ios/sstream>
 
 vtkCxxRevisionMacro(vtkFileCollectionReader, "$Revision: 1.2 $");
 vtkStandardNewMacro(vtkFileCollectionReader);
 
 vtkFileCollectionReader::vtkFileCollectionReader()
 {
+#ifdef USE_XML_READERS
+  this->Reader = vtkXMLGenericDataObjectReader::New();
+#else
   this->Reader = vtkGenericDataObjectReader::New();
+#endif
   this->Table = vtkTable::New();
   
+  this->DirectoryPath=0;
   this->FileNameColumn = 0;
   
   this->SetNumberOfInputPorts(0);
@@ -51,6 +58,7 @@ vtkFileCollectionReader::~vtkFileCollectionReader()
     {
     this->Table->Delete();
     }
+  this->SetDirectoryPath(0);
   this->SetFileNameColumn(0);
 }
 
@@ -76,6 +84,12 @@ int vtkFileCollectionReader::GetNumberOfRows()
 
 int vtkFileCollectionReader::SetReaderFileName()
 {
+  if(this->DirectoryPath==0)
+    {
+    vtkDebugMacro("The DirectoryPath was not specified.");
+    return 0;
+    }
+  
   if (!this->FileNameColumn)
     {
     vtkDebugMacro("The FileNameColumn was not specified.");
@@ -100,7 +114,12 @@ int vtkFileCollectionReader::SetReaderFileName()
     }
   
   vtkStdString& fname = fileNames->GetValue(this->RowIndex);
-  this->Reader->SetFileName(fname.c_str());
+  
+  vtksys_ios::ostringstream ost;
+  ost << this->DirectoryPath << "/" << fname;
+  vtkStdString fullname=ost.str();
+  
+  this->Reader->SetFileName(fullname.c_str());
   
   return 1;
 }

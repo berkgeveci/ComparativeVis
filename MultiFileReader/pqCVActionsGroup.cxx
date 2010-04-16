@@ -33,9 +33,8 @@
 #include "pqPipelineSource.h"
 #include "pqServer.h"
 
-#include "ui_pqCVColumnChooser.h"
-
 #include <QComboBox>
+#include <QFileDialog>
 
 //-----------------------------------------------------------------------------
 pqCVActionsGroup::pqCVActionsGroup(QObject* parentObject)
@@ -96,8 +95,13 @@ void pqCVActionsGroup::tableToDataCollection()
   // - Bring up a dialog to choose the column name
   
   QDialog myDialog;
-  Ui::pqCVColumnChooser ui;
-  ui.setupUi(&myDialog);
+  this->UserInterface.setupUi(&myDialog);
+  
+  
+  connect(this->UserInterface.pathToolButton,SIGNAL(clicked()),this,
+          SLOT(openPathDialog()));
+  
+  this->UserInterface.pathLineEdit->setText(tr(".."));
   
   vtkPVDataSetAttributesInformation* pdi = di->GetRowDataInformation();
   int numArrays = pdi->GetNumberOfArrays();
@@ -107,7 +111,7 @@ void pqCVActionsGroup::tableToDataCollection()
     vtkPVArrayInformation* ai = pdi->GetArrayInformation(i);
     if (ai->GetDataType() == VTK_STRING)
       {
-      ui.comboBox->addItem(ai->GetName());
+      this->UserInterface.comboBox->addItem(ai->GetName());
       }
     }
   if (myDialog.exec() != QDialog::Accepted)
@@ -137,9 +141,27 @@ void pqCVActionsGroup::tableToDataCollection()
   delete[] tableStr;
   
   // - Set the column name
-  vtkstd::string col = ui.comboBox->currentText().toStdString();
+  vtkstd::string col =
+    this->UserInterface.comboBox->currentText().toStdString();
   vtkSMPropertyHelper(reader->getProxy(), "FileNameColumn").Set(col.c_str());
+  
+  vtkstd::string dir=this->UserInterface.pathLineEdit->text().toStdString();
+  vtkSMPropertyHelper(reader->getProxy(), "DirectoryPath").Set(dir.c_str());
+  
+  
   reader->getProxy()->UpdateVTKObjects();
   reader->getProxy()->UpdatePropertyInformation();
 }
 
+// ----------------------------------------------------------------------------
+void pqCVActionsGroup::openPathDialog()
+{
+  QString fullPathdirectoryName=
+    QFileDialog::getExistingDirectory(0,tr("Full path of the directory"),
+                                      this->UserInterface.pathLineEdit->text(),
+                                      QFileDialog::ShowDirsOnly);
+  
+  this->UserInterface.pathLineEdit->setText(fullPathdirectoryName);
+  
+  cout << "fullpath="<< fullPathdirectoryName.toStdString() << endl;
+}

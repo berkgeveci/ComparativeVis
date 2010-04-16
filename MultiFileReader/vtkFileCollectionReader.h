@@ -19,8 +19,17 @@
 
 #include "vtkDataObjectAlgorithm.h"
 
+//#define USE_XML_READERS
+
+#ifndef USE_XML_READERS
 class vtkGenericDataObjectReader;
+#endif
+
 class vtkTable;
+
+#ifdef USE_XML_READERS
+class vtkXMLGenericDataObjectReader;
+#endif
 
 class VTK_EXPORT vtkFileCollectionReader : public vtkDataObjectAlgorithm
 {
@@ -33,6 +42,9 @@ public:
   
   vtkGetObjectMacro(Table, vtkTable);
 
+  vtkSetStringMacro(DirectoryPath);
+  vtkGetStringMacro(DirectoryPath);
+  
   vtkSetStringMacro(FileNameColumn);
   vtkGetStringMacro(FileNameColumn);
 
@@ -71,7 +83,14 @@ private:
   int SetReaderFileName();
 
   vtkTable* Table;
+//BTX  
+#ifdef USE_XML_READERS
+  vtkXMLGenericDataObjectReader *Reader;
+#else
   vtkGenericDataObjectReader* Reader;
+#endif
+//ETX  
+  char *DirectoryPath;
   char* FileNameColumn;
   unsigned int RowIndex;
 };

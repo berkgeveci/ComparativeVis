@@ -6,6 +6,7 @@ include(${PARAVIEW_USE_FILE})
 set(BUILD_SHARED_LIBS "ON")
 
 set(MULTIFILE_READER_SRCS
+    vtkXMLGenericDataObjectReader.cxx
     vtkFileCollectionReader.cxx
     vtkMyDelimitedTextReader.cxx
     vtkSMIntRangeHelper.cxx)
