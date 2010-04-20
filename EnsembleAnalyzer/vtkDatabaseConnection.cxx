@@ -148,6 +148,7 @@ bool vtkDatabaseConnection::ConnectToDatabase()
     {
     return this->ConnectToSQLiteDatabase();
     }
+  return false;
 }
 
 //-----------------------------------------------------------------------------
