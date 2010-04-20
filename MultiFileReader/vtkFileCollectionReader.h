@@ -19,7 +19,7 @@
 
 #include "vtkDataObjectAlgorithm.h"
 
-//#define USE_XML_READERS
+#define USE_XML_READERS
 
 #ifndef USE_XML_READERS
 class vtkGenericDataObjectReader;

@@ -61,3 +61,9 @@ if (PARAVIEW_BUILD_QT_GUI)
   set_target_properties(MultiFileReaderGUI PROPERTIES PREFIX "")
 endif (PARAVIEW_BUILD_QT_GUI)
 
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+if(BUILD_TESTING)
+ add_subdirectory(Testing)
+endif()

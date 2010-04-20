@@ -39,6 +39,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkPolyData.h"
 #include "vtkInformation.h"
+#include "vtkInformationVector.h"
 #include <cassert>
 
 vtkCxxRevisionMacro(vtkXMLGenericDataObjectReader, "$Revision$");
@@ -159,15 +160,19 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
     this->Reader=0;
     }
   
+  vtkDataObject *output=0;
+  
   // Create reader.
   bool parallel=false;
   switch(this->ReadOutputType(this->FileName,parallel))
     {
     case VTK_HIERARCHICAL_BOX_DATA_SET:
       this->Reader=vtkXMLHierarchicalBoxDataReader::New();
+      output=vtkHierarchicalBoxDataSet::New();
       break;
     case VTK_HYPER_OCTREE:
       this->Reader=vtkXMLHyperOctreeReader::New();
+      output=vtkHyperOctree::New();
       break;
     case VTK_IMAGE_DATA:
       if(parallel)
@@ -178,9 +183,11 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
         {
         this->Reader=vtkXMLImageDataReader::New();
         }
+      output=vtkImageData::New();
       break;
     case VTK_MULTIBLOCK_DATA_SET:
       this->Reader=vtkXMLMultiBlockDataReader::New();
+      output=vtkMultiBlockDataSet::New();
       break;
     case VTK_POLY_DATA:
       if(parallel)
@@ -191,6 +198,7 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
         {
         this->Reader=vtkXMLPolyDataReader::New();
         }
+      output=vtkPolyData::New();
       break;
     case VTK_RECTILINEAR_GRID:
       if(parallel)
@@ -201,6 +209,7 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
         {
         this->Reader=vtkXMLRectilinearGridReader::New();
         }
+      output=vtkRectilinearGrid::New();
       break;
     case VTK_STRUCTURED_GRID:
       if(parallel)
@@ -211,6 +220,7 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
         {
         this->Reader=vtkXMLStructuredGridReader::New();
         }
+      output=vtkStructuredGrid::New();
       break;
     case VTK_UNSTRUCTURED_GRID:
       if(parallel)
@@ -221,6 +231,8 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
         {
         this->Reader=vtkXMLUnstructuredGridReader::New();
         }
+      output=vtkUnstructuredGrid::New();
+      break;
     default:
       this->Reader=0;
     }
@@ -231,7 +243,19 @@ int vtkXMLGenericDataObjectReader::RequestDataObject(
 //    this->Reader->SetStream(this->GetStream());
     // Delegate call. RequestDataObject() would be more appropriate but it is
     // protected.
-    return this->Reader->ProcessRequest(request, inputVector, outputVector);
+    int result=this->Reader->ProcessRequest(request,inputVector,outputVector);
+    if(result)
+      {
+      vtkInformation* outInfo = outputVector->GetInformationObject(0);
+      output->SetPipelineInformation(outInfo);
+      
+//      outInfo->Set(vtkDataObject::DATA_OBJECT(),output);
+      if(output!=0)
+        {
+        output->Delete();
+        }
+      }
+    return result;
     }
   else
     {
