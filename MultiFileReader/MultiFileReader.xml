@@ -60,6 +60,7 @@
      <Hints>
        <Property name="Table" show="0"/>
        <Property name="FileNameColumn" show="0"/>
+       <Property name="DirectoryPath" show="0"/>
        <View type="RenderView" />
      </Hints>
 
