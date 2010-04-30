@@ -6,7 +6,6 @@ include(${PARAVIEW_USE_FILE})
 set(BUILD_SHARED_LIBS "ON")
 
 set(MULTIFILE_READER_SRCS
-    vtkXMLGenericDataObjectReader.cxx
     vtkFileCollectionReader.cxx
     vtkMyDelimitedTextReader.cxx
     vtkSMIntRangeHelper.cxx)
@@ -60,6 +59,9 @@ if (PARAVIEW_BUILD_QT_GUI)
 
   set_target_properties(MultiFileReaderGUI PROPERTIES PREFIX "")
 endif (PARAVIEW_BUILD_QT_GUI)
+
+add_executable(TestStats TestStats.cxx)
+target_link_libraries(TestStats MultiFileReader vtkIO)
 
 # -----------------------------------------------------------------------------
 # Testing
