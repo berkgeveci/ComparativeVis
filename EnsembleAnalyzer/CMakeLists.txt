@@ -6,8 +6,8 @@ endif(COMMAND cmake_policy)
 
 PROJECT(EnsembleAnalyzer)
 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
+find_package(ParaView REQUIRED)
+include(${PARAVIEW_USE_FILE})
 
 # Give user option of building shared or static libraries.  Default to
 # the choice made for VTK.

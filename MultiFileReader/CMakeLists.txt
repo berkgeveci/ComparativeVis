@@ -60,8 +60,8 @@ if (PARAVIEW_BUILD_QT_GUI)
   set_target_properties(MultiFileReaderGUI PROPERTIES PREFIX "")
 endif (PARAVIEW_BUILD_QT_GUI)
 
-add_executable(TestStats TestStats.cxx)
-target_link_libraries(TestStats MultiFileReader vtkIO)
+#add_executable(TestStats TestStats.cxx)
+#target_link_libraries(TestStats MultiFileReader vtkIO)
 
 # -----------------------------------------------------------------------------
 # Testing
