@@ -26,7 +26,6 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 
 #include <sstream>
-vtkCxxRevisionMacro(vtkCMFEFilter, "$Revision: 0.4$");
 vtkStandardNewMacro(vtkCMFEFilter);
 
 //----------------------------------------------------------------------------
@@ -46,7 +45,7 @@ vtkCMFEFilter::~vtkCMFEFilter()
 void vtkCMFEFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 {
   this->SetInputConnection(1, algOutput);
-} 
+}
 
 //----------------------------------------------------------------------------
 int vtkCMFEFilter::RequestInformation(vtkInformation *vtkNotUsed(request),
@@ -56,7 +55,7 @@ int vtkCMFEFilter::RequestInformation(vtkInformation *vtkNotUsed(request),
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
   outInfo->Set(vtkStreamingDemandDrivenPipeline::MAXIMUM_NUMBER_OF_PIECES(), -1);
 
-  
+
 
   return 1;
 }
@@ -71,43 +70,43 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   // get the input and output
-  vtkDataSet *input = vtkDataSet::SafeDownCast( 
+  vtkDataSet *input = vtkDataSet::SafeDownCast(
     inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkDataSet *source = vtkDataSet::SafeDownCast( 
+  vtkDataSet *source = vtkDataSet::SafeDownCast(
     sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkDataSet *output = vtkDataSet::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  
+
   if (!source || !input )
     {
     vtkErrorMacro("Source or Input was not found");
     return 0;
     }
 
-  //get the input arrays to mesh  
+  //get the input arrays to mesh
   vtkDataArray *inputProp = this->GetInputArrayToProcess(0,
     inInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkDataArray *sourceProp = this->GetInputArrayToProcess(1,
     sourceInfo->Get(vtkDataObject::DATA_OBJECT()));
 
- 
+
 
   if ( !inputProp || !sourceProp )
     {
     vtkErrorMacro("Unable to find a property the user selected");
     return 0;
     }
-  
+
   vtkStdString outputName = inputProp->GetName();
   if ( outputName == sourceProp->GetName() )
-    {    
-    outputName +="Result";        
+    {
+    outputName +="Result";
     }
 
-  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(), 
+  vtkDataSet *temp = vtkCMFEAlgorithm::PerformCMFE( source, input , sourceProp->GetName(),
     inputProp->GetName(), outputName );
-  
+
   output->ShallowCopy( temp );
   temp->Delete();
 
@@ -118,5 +117,5 @@ int vtkCMFEFilter::RequestData(vtkInformation *vtkNotUsed(request),
 //----------------------------------------------------------------------------
 void vtkCMFEFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent); 
+  this->Superclass::PrintSelf(os,indent);
 }

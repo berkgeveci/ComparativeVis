@@ -76,14 +76,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * DAMAGE.
 *
 *****************************************************************************/
-// .NAME vtkUnstructuredGridRelevantPointsFilter - strips away points and 
+// .NAME vtkUnstructuredGridRelevantPointsFilter - strips away points and
 // associated point data that are not referenced by any cell in the input.
-// associated with any cells 
+// associated with any cells
 // .SECTION Description
 // vtkUnstructuredGridRelevantPointsFilter is a filter that takes unstructured
-// grid data as input and generates unstructured grid data as output. 
+// grid data as input and generates unstructured grid data as output.
 // vtkUnstructuredGridRelevantPointsFilter removes points and associated
-// point data that are not referenced by any cell in the input data set. 
+// point data that are not referenced by any cell in the input data set.
 //
 // .SECTION Caveats
 //
@@ -100,7 +100,7 @@ class vtkUnstructuredGridRelevantPointsFilter : public vtkUnstructuredGridAlgori
 public:
   static vtkUnstructuredGridRelevantPointsFilter* New();
 
-  vtkTypeRevisionMacro(vtkUnstructuredGridRelevantPointsFilter,  vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkUnstructuredGridRelevantPointsFilter,  vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
 protected:
@@ -111,7 +111,7 @@ protected:
 
 private:
   vtkUnstructuredGridRelevantPointsFilter(const vtkUnstructuredGridRelevantPointsFilter&);
-  void operator=(const vtkUnstructuredGridRelevantPointsFilter&);  
+  void operator=(const vtkUnstructuredGridRelevantPointsFilter&);
 };
 
 #endif

@@ -24,7 +24,7 @@ class CMFEFILTER_EXPORT vtkCMFEFilter : public vtkDataSetAlgorithm
 {
 public:
   static vtkCMFEFilter* New();
-  vtkTypeRevisionMacro(vtkCMFEFilter, vtkDataSetAlgorithm);
+  vtkTypeMacro(vtkCMFEFilter, vtkDataSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:

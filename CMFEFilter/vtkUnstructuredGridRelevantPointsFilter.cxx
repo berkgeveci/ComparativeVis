@@ -7,7 +7,7 @@
   Version:   $Revision: 1.54 $
 
 
-Copyright (c) 1993-2000 Ken Martin, Will Schroeder, Bill Lorensen 
+Copyright (c) 1993-2000 Ken Martin, Will Schroeder, Bill Lorensen
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkPointData.h"
 #include "vtkUnstructuredGrid.h"
 
-vtkCxxRevisionMacro(vtkUnstructuredGridRelevantPointsFilter, "$Revision: 0.1$");
 vtkStandardNewMacro(vtkUnstructuredGridRelevantPointsFilter);
 
 //----------------------------------------------------------------------------
@@ -105,16 +104,16 @@ vtkUnstructuredGridRelevantPointsFilter::~vtkUnstructuredGridRelevantPointsFilte
 int vtkUnstructuredGridRelevantPointsFilter::RequestData(vtkInformation *vtkNotUsed(request), vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
    // get the info objects
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0); 
+  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   // get the input and output
-  vtkUnstructuredGrid *input = vtkUnstructuredGrid::SafeDownCast( inInfo->Get(vtkDataObject::DATA_OBJECT())); 
+  vtkUnstructuredGrid *input = vtkUnstructuredGrid::SafeDownCast( inInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast( outInfo->Get(vtkDataObject::DATA_OBJECT()));
-  
+
   vtkDebugMacro(<<"Beginning UnstructuredGrid Relevant Points Filter ");
 
-  if (input == NULL) 
+  if (input == NULL)
     {
     vtkErrorMacro(<<"Input is NULL");
     return 0;
@@ -124,25 +123,25 @@ int vtkUnstructuredGridRelevantPointsFilter::RequestData(vtkInformation *vtkNotU
   int numInPts = input->GetNumberOfPoints();
   int numCells = input->GetNumberOfCells();
   output->Allocate(numCells);
-  
-  if ( (numInPts<1) || (inPts == NULL ) ) 
+
+  if ( (numInPts<1) || (inPts == NULL ) )
     {
     vtkErrorMacro(<<"No data to Operate On!");
     return 0;
     }
-  
+
   input->BuildLinks();
   vtkPoints *newPts = vtkPoints::New();
   newPts->Allocate(numInPts);
-  
+
   vtkCellData  *inputCD = input->GetCellData();
   vtkCellData  *outputCD = output->GetCellData();
   outputCD->PassData(inputCD);
-  
+
   vtkPointData *inputPD  = input->GetPointData();
   vtkPointData *outputPD = output->GetPointData();
   outputPD->CopyAllocate(inputPD);
-  
+
   int numNewPts = 0;
   vtkIdList *cellIds = vtkIdList::New();
   int *pointMap = new int[numInPts];
@@ -152,7 +151,7 @@ int vtkUnstructuredGridRelevantPointsFilter::RequestData(vtkInformation *vtkNotU
   for (i = 0; i < numInPts; i++)
     {
     input->GetPointCells(i, cellIds);
-    if (0 == cellIds->GetNumberOfIds()) 
+    if (0 == cellIds->GetNumberOfIds())
       {
       pointMap[i] = -1;
       }
@@ -171,17 +170,17 @@ int vtkUnstructuredGridRelevantPointsFilter::RequestData(vtkInformation *vtkNotU
   // now work through cells, changing associated point id to coincide
   // with the new ones as specified in the pointmap;
 
-  vtkIdList *oldIds = vtkIdList::New(); 
+  vtkIdList *oldIds = vtkIdList::New();
   vtkIdList *newIds = vtkIdList::New();
   int j, id, cellType;
-  for (i = 0; i < numCells; i++) 
+  for (i = 0; i < numCells; i++)
     {
     input->GetCellPoints(i, oldIds);
     cellType = input->GetCellType(i);
     newIds->SetNumberOfIds(oldIds->GetNumberOfIds());
     for (j = 0; j < oldIds->GetNumberOfIds(); j++)
       {
-      id = oldIds->GetId(j); 
+      id = oldIds->GetId(j);
       newIds->SetId(j, pointMap[id]);
       }
       output->InsertNextCell(cellType, newIds);
@@ -198,7 +197,7 @@ int vtkUnstructuredGridRelevantPointsFilter::RequestData(vtkInformation *vtkNotU
 
 //------------------------------------------------------------------------------
 void vtkUnstructuredGridRelevantPointsFilter::
-PrintSelf(ostream& os, vtkIndent indent) 
+PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
