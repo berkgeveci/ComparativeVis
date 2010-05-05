@@ -22,6 +22,12 @@
 #include "vtkScalarBarActor.h"
 #include "vtkContourFilter.h"
 #include "vtkProperty.h"
+#include "vtkXMLRectilinearGridWriter.h"
+
+double KelvinToCelsius(double kelvin)
+{
+  return kelvin-273.15;
+}
 
 int main(int argc,
          char *argv[])
@@ -83,7 +89,8 @@ int main(int argc,
   int ext[6];
   g->GetExtent(ext);
   
-  vtkSmartPointer<vtkRectilinearGrid> statResult=vtkSmartPointer<vtkRectilinearGrid>::New();
+  vtkSmartPointer<vtkRectilinearGrid> statResult=
+    vtkSmartPointer<vtkRectilinearGrid>::New();
   statResult->SetExtent(ext[0],ext[1],ext[2],ext[3],ext[4],ext[4]);
   statResult->GetXCoordinates()->DeepCopy(g->GetXCoordinates());
   statResult->GetYCoordinates()->DeepCopy(g->GetYCoordinates());
@@ -114,11 +121,13 @@ int main(int argc,
   vtkSmartPointer<vtkActor> actor=vtkSmartPointer<vtkActor>::New();
   r->AddViewProp(actor);
   
-  vtkSmartPointer<vtkRectilinearGridGeometryFilter> geo=vtkSmartPointer<vtkRectilinearGridGeometryFilter>::New();
+  vtkSmartPointer<vtkRectilinearGridGeometryFilter> geo=
+    vtkSmartPointer<vtkRectilinearGridGeometryFilter>::New();
   
   geo->SetInput(extract->GetOutput());
   
-  vtkSmartPointer<vtkPolyDataMapper> mapper=vtkSmartPointer<vtkPolyDataMapper>::New();
+  vtkSmartPointer<vtkPolyDataMapper> mapper=
+    vtkSmartPointer<vtkPolyDataMapper>::New();
   
   mapper->SetInputConnection(geo->GetOutputPort());
   actor->SetMapper(mapper);
@@ -126,7 +135,9 @@ int main(int argc,
   mapper->SetScalarVisibility(true);
   mapper->SetInterpolateScalarsBeforeMapping(true);
   mapper->SetUseLookupTableScalarRange(false);
-  mapper->SetScalarRange(range);// no effect when UseLookupTableScalarRange is true
+  
+  // no effect when UseLookupTableScalarRange is true
+  mapper->SetScalarRange(range);
   
   vtkSmartPointer<vtkLookupTable> lut=vtkSmartPointer<vtkLookupTable>::New();
   mapper->SetLookupTable(lut);
@@ -178,7 +189,7 @@ int main(int argc,
         {
         (*arrays)[static_cast<size_t>(j*dims[0]+i)]->SetValue(
           dataset,
-          s->GetValue(j*dims[0]+i));
+          KelvinToCelsius(s->GetValue(j*dims[0]+i)));
         ++i;
         }
       ++j;
@@ -198,12 +209,14 @@ int main(int argc,
   ds->SetTestOption(true);
   ds->SignedDeviationsOff();
   
-  vtkSmartPointer<vtkDoubleArray> meanArray=vtkSmartPointer<vtkDoubleArray>::New();
+  vtkSmartPointer<vtkDoubleArray> meanArray=
+    vtkSmartPointer<vtkDoubleArray>::New();
   meanArray->SetName("mean");
   meanArray->SetNumberOfComponents(1);
   meanArray->SetNumberOfTuples(static_cast<vtkIdType>(size));
   
-  vtkSmartPointer<vtkDoubleArray> stddevArray=vtkSmartPointer<vtkDoubleArray>::New();
+  vtkSmartPointer<vtkDoubleArray> stddevArray=
+    vtkSmartPointer<vtkDoubleArray>::New();
   stddevArray->SetName("stddev");
   stddevArray->SetNumberOfComponents(1);
   stddevArray->SetNumberOfTuples(static_cast<vtkIdType>(size));
@@ -237,6 +250,14 @@ int main(int argc,
     ++j;
     }  
   
+  // write the result in a file
+  vtkSmartPointer<vtkXMLRectilinearGridWriter> writer=
+    vtkSmartPointer<vtkXMLRectilinearGridWriter>::New();
+  
+  writer->SetInput(statResult);
+  writer->SetFileName("statResult.vtr");
+  writer->Write();
+  
   // visualization pipeline:
   geo->SetInput(statResult);
   
@@ -248,7 +269,8 @@ int main(int argc,
     SetActiveAttribute("mean",vtkDataSetAttributes::SCALARS);
   
   cout << "get the active scalars" << endl;
-  vtkDataArray *s=statResult->GetPointData()->GetAttribute(vtkDataSetAttributes::SCALARS);
+  vtkDataArray *s=
+    statResult->GetPointData()->GetAttribute(vtkDataSetAttributes::SCALARS);
   cout << "get the range of the active scalars" << endl;
   s->GetRange(range);
   cout << "range=" <<range[0]<< ", " << range[1] << endl;
@@ -263,9 +285,11 @@ int main(int argc,
   scalarWidget->EnabledOn();
   
   // Standard deviation as contours.
-  vtkSmartPointer<vtkContourFilter> contour=vtkSmartPointer<vtkContourFilter>::New();
+  vtkSmartPointer<vtkContourFilter> contour=
+    vtkSmartPointer<vtkContourFilter>::New();
   
-  vtkSmartPointer<vtkRectilinearGrid> clone=vtkSmartPointer<vtkRectilinearGrid>::New();
+  vtkSmartPointer<vtkRectilinearGrid> clone=
+    vtkSmartPointer<vtkRectilinearGrid>::New();
   clone->DeepCopy(statResult);
   
   contour->SetInput(clone);
@@ -296,7 +320,7 @@ int main(int argc,
   p->SetLighting(false);
   p->SetColor(0.0,0.0,0.0);
   
-  r->AddActor(actor2);
+//  r->AddActor(actor2);
   
   w->Render();
   interactor->Start();
