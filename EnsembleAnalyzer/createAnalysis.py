@@ -3,15 +3,21 @@
 import sqlite3
 import sys
 
-conn = sqlite3.connect('bin/weather.db')
+try:
+  conn = sqlite3.connect(sys.argv[1])
+except sqlite3.Error, e:
+  print "Error occurred:", e.args[0]
+  sys.exit(1)
+
 c = conn.cursor()
+
 try:
   c.execute("DROP TABLE analyses")
 except sqlite3.Error, e:
   print "Error occurred:", e.args[0]
-  sys.exit(1)
+
 try:
-  c.execute("CREATE TABLE analyses(experiment INTEGER, input TEXT, operation TEXT, parameters TEXT, results TEXT, FOREIGN KEY(experiment) REFERENCES experiments(experimentid))")
+  c.execute("CREATE TABLE analyses(analysis INTEGER, experiment INTEGER, name TEXT, description TEXT, FOREIGN KEY(experiment) REFERENCES experiments(experimentid))")
 except sqlite3.Error, e:
   print "Error occurred:", e.args[0]
   sys.exit(1)
