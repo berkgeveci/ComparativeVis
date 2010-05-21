@@ -53,10 +53,6 @@ vtkDatabaseConnection::~vtkDatabaseConnection()
     }
   if(this->SQLiteDatabase)
     {
-    if(this->SQLiteDatabase->IsOpen())
-      {
-      this->SQLiteDatabase->Close();
-      }
     this->SQLiteDatabase->Delete();
     }
 }

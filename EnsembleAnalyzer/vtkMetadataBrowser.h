@@ -16,15 +16,19 @@ public:
  
   //browse database & extract metadata
   vtkStringArray* GetListOfExperiments(); 
+  vtkTable* GetMetaDataFromExperiment(const char *experimentName);
   vtkTable* GetDataFromExperiment(const char *experimentName, const char *query);
   vtkTable* GetAnalyses(const char *analysisName);
   void SetDatabaseConnection(vtkDatabaseConnection *dbc);
   vtkDatabaseConnection* GetDatabaseConnection();
   int GetExperimentId(const char *experimentName);
   //BTX
+  vtkTable* GetMetaDataFromExperiment(std::string experimentName);
   vtkTable* GetDataFromExperiment(std::string experimentName, std::string query);
   vtkTable* GetAnalyses(std::string analysisName);
   //ETX
+
+  void AddAnalysis(const char *tableName, vtkTable *analysis);
 
 protected:
 	vtkMetadataBrowser();

@@ -14,6 +14,7 @@
 
 #include "vtkDatabaseConnection.h"
 #include "vtkMetadataBrowser.h"
+#include "vtkTableToSQLiteWriter.h" 
 
 vtkStandardNewMacro(vtkMetadataBrowser);
 vtkCxxRevisionMacro(vtkMetadataBrowser, "$Revision: 1.1 $");
@@ -234,6 +235,22 @@ vtkTable* vtkMetadataBrowser::GetDataFromExperiment(const char *experimentName,
 }
 
 //-----------------------------------------------------------------------------
+vtkTable* 
+vtkMetadataBrowser::GetMetaDataFromExperiment(const char *experimentName)
+{
+  const char *query = "SELECT *";
+  return this->GetDataFromExperiment(experimentName, query);
+}
+
+//-----------------------------------------------------------------------------
+vtkTable* 
+vtkMetadataBrowser::GetMetaDataFromExperiment(std::string experimentName)
+{
+  std::string query = "SELECT *";
+  return this->GetDataFromExperiment(experimentName, query);
+}
+
+//-----------------------------------------------------------------------------
 int vtkMetadataBrowser::GetExperimentId(const char *experimentName)
 {
   std::string query = "SELECT experimentid FROM experiments WHERE name = '";
@@ -250,5 +267,23 @@ int vtkMetadataBrowser::GetExperimentId(const char *experimentName)
   int experimentId = va->GetValue(0).ToInt();
   va->Delete();
   return experimentId;
+}
+
+//-----------------------------------------------------------------------------
+void vtkMetadataBrowser::AddAnalysis(const char *tableName, vtkTable *analysis)
+{
+  if(this->GetDatabaseConnection()->IsUsingSQLite() == false)
+    {
+    cerr << "AddAnalysis is only implemented for SQLite so far." << endl;
+    return;
+    }
+
+  vtkSmartPointer<vtkTableToSQLiteWriter> analysisWriter = 
+    vtkSmartPointer<vtkTableToSQLiteWriter>::New();
+  
+  analysisWriter->SetDatabase(this->DatabaseConnection->GetSQLiteDatabase());
+  analysisWriter->SetInput(analysis);
+  analysisWriter->SetTableName(tableName);
+  analysisWriter->Update();
 }
 
